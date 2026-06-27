@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+{% block title %}{% if lang == 'pt' %}Mademoiselle Estética & Beleza{% else %}Mademoiselle Aesthetics & Beauty{% endif %}{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="container hero-content">
+    <div class="hero-logo-wrap">
+      <img src="{{ url_for('static', filename='images/logo.png') }}"
+           alt="Mademoiselle Estética & Beleza"
+           class="hero-logo"
+           onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+      <p class="hero-eyebrow" style="display:none;">{% if lang == 'pt' %}Bem-vinda à{% else %}Welcome to{% endif %}</p>
+    </div>
+    <h1 class="hero-title">Mademoiselle</h1>
+    <p class="hero-tagline">Estética &amp; Beleza <span class="hero-by">por Daniela Alves</span></p>
+    <p class="hero-subtitle">
+      {% if lang == 'pt' %}
+        Transforme a sua beleza com carinho, expertise e produtos de alta qualidade.
+      {% else %}
+        Transform your beauty with care, expertise and premium quality products.
+      {% endif %}
+    </p>
+    <div class="hero-actions">
+      <a href="{{ url_for('main.book') }}" class="btn btn-primary btn-lg">
+        {% if lang == 'pt' %}Agendar Horário{% else %}Book Appointment{% endif %}
+      </a>
+      <a href="{{ url_for('main.services') }}" class="btn btn-outline btn-lg">
+        {% if lang == 'pt' %}Ver Serviços{% else %}View Services{% endif %}
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Showcase Image -->
+<section class="showcase-section">
+  <div class="container showcase-inner">
+    <div class="showcase-image-wrap">
+      <img
+        src="{{ url_for('static', filename='images/essence.png') }}"
+        alt="Mademoiselle Estética & Beleza"
+        class="showcase-img"
+      />
+      <div class="showcase-badge">
+        <span class="showcase-badge-icon">✦</span>
+        <span>{% if lang == 'pt' %}Arte & Beleza{% else %}Art & Beauty{% endif %}</span>
+      </div>
+    </div>
+    <div class="showcase-text">
+      <p class="showcase-eyebrow">{% if lang == 'pt' %}A Nossa Essência{% else %}Our Essence{% endif %}</p>
+      <h2 class="showcase-title">
+        {% if lang == 'pt' %}Beleza com<br/><em>intenção</em>{% else %}Beauty with<br/><em>intention</em>{% endif %}
+      </h2>
+      <p class="showcase-desc">
+        {% if lang == 'pt' %}
+          Cada tratamento é uma experiência pensada ao detalhe. O nosso espaço foi criado para que se sinta cuidada, relaxada e verdadeiramente especial.
+        {% else %}
+          Every treatment is an experience crafted down to the last detail. Our space was created for you to feel cared for, relaxed, and truly special.
+        {% endif %}
+      </p>
+      <a href="{{ url_for('main.book') }}" class="btn btn-luxury">
+        {% if lang == 'pt' %}Reservar Experiência{% else %}Reserve Experience{% endif %}
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Stats -->
+<section class="stats-bar">
+  <div class="container stats-grid">
+    <div class="stat-item">
+      <span class="stat-number">10+</span>
+      <span class="stat-label">{% if lang == 'pt' %}Anos de Experiência{% else %}Years of Experience{% endif %}</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-number">5000+</span>
+      <span class="stat-label">{% if lang == 'pt' %}Clientes Satisfeitas{% else %}Happy Clients{% endif %}</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-number">{{ categories | length * 5 }}+</span>
+      <span class="stat-label">{% if lang == 'pt' %}Serviços Disponíveis{% else %}Services Available{% endif %}</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-number">5 ✦</span>
+      <span class="stat-label">{% if lang == 'pt' %}Avaliação Média{% else %}Average Rating{% endif %}</span>
+    </div>
+  </div>
+</section>
+
+<!-- Services Overview -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <p class="section-eyebrow">{% if lang == 'pt' %}O Que Oferecemos{% else %}What We Offer{% endif %}</p>
+      <h2 class="section-title">{% if lang == 'pt' %}Os Nossos Serviços{% else %}Our Services{% endif %}</h2>
+      <p class="section-subtitle">
+        {% if lang == 'pt' %}
+          Descubra a nossa gama completa de tratamentos pensados especialmente para si.
+        {% else %}
+          Discover our complete range of treatments tailored especially for you.
+        {% endif %}
+      </p>
+    </div>
+    <div class="categories-grid">
+      {% for cat in categories %}
+      <a href="{{ url_for('main.services') }}#cat-{{ cat.id }}" class="category-card">
+        <h3 class="category-name">{{ cat.name(lang) }}</h3>
+        <p class="category-count">{{ cat.services | selectattr('active') | list | length }} {% if lang == 'pt' %}tratamentos{% else %}treatments{% endif %}</p>
+        <span class="category-arrow">→</span>
+      </a>
+      {% endfor %}
+    </div>
+    <div class="section-cta">
+      <a href="{{ url_for('main.services') }}" class="btn btn-luxury">
+        {% if lang == 'pt' %}Ver Todos os Tratamentos{% else %}View All Treatments{% endif %}
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Why Choose Us -->
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-header">
+      <p class="section-eyebrow">{% if lang == 'pt' %}Porquê Escolher-nos{% else %}Why Choose Us{% endif %}</p>
+      <h2 class="section-title">{% if lang == 'pt' %}A Experiência Mademoiselle{% else %}The Mademoiselle Experience{% endif %}</h2>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🌸</div>
+        <h3>{% if lang == 'pt' %}Profissionais Certificadas{% else %}Certified Professionals{% endif %}</h3>
+        <p>{% if lang == 'pt' %}A nossa equipa é treinada e certificada nas mais modernas técnicas do mercado.{% else %}Our team is trained and certified in the latest industry techniques.{% endif %}</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💎</div>
+        <h3>{% if lang == 'pt' %}Produtos Premium{% else %}Premium Products{% endif %}</h3>
+        <p>{% if lang == 'pt' %}Utilizamos apenas produtos de alta qualidade, seguros e eficazes.{% else %}We use only high-quality, safe and effective products.{% endif %}</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📅</div>
+        <h3>{% if lang == 'pt' %}Marcação Fácil{% else %}Easy Booking{% endif %}</h3>
+        <p>{% if lang == 'pt' %}Marque o seu horário online em minutos, com confirmação imediata.{% else %}Book your appointment online in minutes, with instant confirmation.{% endif %}</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💆</div>
+        <h3>{% if lang == 'pt' %}Ambiente Acolhedor{% else %}Welcoming Atmosphere{% endif %}</h3>
+        <p>{% if lang == 'pt' %}Um espaço pensado para o seu relaxamento e conforto total.{% else %}A space designed for your complete relaxation and comfort.{% endif %}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section class="section testimonials-section">
+  <div class="container">
+    <div class="section-header">
+      <p class="section-eyebrow">{% if lang == 'pt' %}O Que Dizem as Nossas Clientes{% else %}What Our Clients Say{% endif %}</p>
+      <h2 class="section-title">{% if lang == 'pt' %}Avaliações Reais{% else %}Real Reviews{% endif %}</h2>
+      <div class="testimonials-stars-row">
+        <span class="star-icon">★★★★★</span>
+        <span class="testimonials-rating-text">{% if lang == 'pt' %}5.0 no Google · Avaliações verificadas{% else %}5.0 on Google · Verified reviews{% endif %}</span>
+      </div>
+    </div>
+    <div class="testimonials-grid">
+
+      <div class="testimonial-card">
+        <div class="testimonial-header">
+          <div class="testimonial-avatar" style="background: linear-gradient(135deg, #5b8dd9, #7b6dc8);">CM</div>
+          <div class="testimonial-meta">
+            <span class="testimonial-name">Charley Minards</span>
+            <span class="testimonial-info">{% if lang == 'pt' %}2 críticas · há 2 meses{% else %}2 reviews · 2 months ago{% endif %}</span>
+          </div>
+          <div class="testimonial-google">
+            <svg width="16" height="16" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          </div>
+        </div>
+        <div class="testimonial-stars">★★★★★</div>
+        <blockquote class="testimonial-text">
+          {% if lang == 'pt' %}"A Daniela é simplesmente incrível. O atendimento dela é sempre excepcional e ela é uma pessoa super gentil. Ela transformou completamente as minhas unhas! Não poderia estar mais feliz com o resultado. Recomendo muito! 🎉✨"{% else %}"Daniela is simply incredible. Her service is always exceptional and she is a super kind person. She completely transformed my nails! I couldn't be happier with the result. Highly recommend! 🎉✨"{% endif %}
+        </blockquote>
+      </div>
+
+      <div class="testimonial-card testimonial-card-featured">
+        <div class="testimonial-header">
+          <div class="testimonial-avatar" style="background: linear-gradient(135deg, #c9a96e, #c07b96);">DR</div>
+          <div class="testimonial-meta">
+            <span class="testimonial-name">Dora Reis</span>
+            <span class="testimonial-info">{% if lang == 'pt' %}Guia local · há 2 meses{% else %}Local guide · 2 months ago{% endif %}</span>
+          </div>
+          <div class="testimonial-google">
+            <svg width="16" height="16" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          </div>
+        </div>
+        <div class="testimonial-stars">★★★★★</div>
+        <blockquote class="testimonial-text">
+          {% if lang == 'pt' %}"Ambiente acolhedor, profissionalismo garantido, muito simpática e versátil."{% else %}"Welcoming atmosphere, guaranteed professionalism, very friendly and versatile."{% endif %}
+        </blockquote>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="testimonial-header">
+          <div class="testimonial-avatar" style="background: linear-gradient(135deg, #b89bc8, #c9a96e);">MS</div>
+          <div class="testimonial-meta">
+            <span class="testimonial-name">Marta Santos</span>
+            <span class="testimonial-info">{% if lang == 'pt' %}1 crítica · há 2 meses{% else %}1 review · 2 months ago{% endif %}</span>
+          </div>
+          <div class="testimonial-google">
+            <svg width="16" height="16" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          </div>
+        </div>
+        <div class="testimonial-stars">★★★★★</div>
+        <blockquote class="testimonial-text">
+          {% if lang == 'pt' %}"10/10 super amorosa e atenciosa, recomendo imenso 🤌"{% else %}"10/10 super loving and attentive, I highly recommend 🤌"{% endif %}
+        </blockquote>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container cta-content">
+    <h2>{% if lang == 'pt' %}Pronta para a sua Transformação?{% else %}Ready for Your Transformation?{% endif %}</h2>
+    <p>{% if lang == 'pt' %}Marque agora e viva a experiência Mademoiselle.{% else %}Book now and live the Mademoiselle experience.{% endif %}</p>
+    <a href="{{ url_for('main.book') }}" class="btn btn-primary btn-lg">
+      {% if lang == 'pt' %}Marcar o Meu Horário{% else %}Book My Appointment{% endif %}
+    </a>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,231 @@
+Replace all sample services in seed_data() with the following Mademoiselle services.
+
+CATEGORIES
+
+1. Pedicure
+2. Manicure
+3. Depilação / Waxing
+4. Sobrancelhas / Eyebrows
+5. Pestanas / Eyelashes
+6. Faciais / Facials
+
+SERVICES
+
+PEDICURE
+
+Service:
+PT: Pedicure Normal
+EN: Regular Pedicure
+Price: 25.00
+Duration: 30
+Category: Pedicure
+
+Service:
+PT: Pedicure SPA
+EN: SPA Pedicure
+Price: 40.00
+Duration: 40
+Category: Pedicure
+
+Service:
+PT: Verniz Gel / Shellac
+EN: Gel Polish / Shellac
+Price: 35.00
+Duration: 60
+Category: Pedicure
+
+Service:
+PT: Cortar + Pintar
+EN: Cut + Paint
+Price: 12.50
+Duration: 15
+Category: Pedicure
+
+MANICURE
+
+Service:
+PT: Manicure Normal
+EN: Regular Manicure
+Price: 15.00
+Duration: 30
+Category: Manicure
+
+Service:
+PT: SPA das Mãos
+EN: Hand SPA
+Price: 25.00
+Duration: 30
+Category: Manicure
+
+Service:
+PT: Verniz Gel Shellac
+EN: Shellac Gel Polish
+Price: 25.00
+Duration: 60
+Category: Manicure
+
+Service:
+PT: Aplicação Gel
+EN: Gel Nail Application
+Price: 45.00
+Duration: 90
+Category: Manicure
+
+Service:
+PT: Manutenção Gel
+EN: Gel Maintenance
+Price: 30.00
+Duration: 60
+Category: Manicure
+
+Service:
+PT: Gel Manicure Francesa
+EN: French Gel Manicure
+Price: 35.00
+Duration: 120
+Category: Manicure
+
+Service:
+PT: Remover Gel
+EN: Gel Removal
+Price: 12.50
+Duration: 30
+Category: Manicure
+
+Service:
+PT: Nail Art
+EN: Nail Art
+Price: 2.50
+Duration: 15
+Category: Manicure
+
+DEPILAÇÃO / WAXING
+
+Service:
+PT: Meia Perna
+EN: Half Leg
+Price: 15.00
+Duration: 15
+Category: Depilação
+
+Service:
+PT: Perna Inteira
+EN: Full Leg
+Price: 22.00
+Duration: 30
+Category: Depilação
+
+Service:
+PT: Perna + Virilha
+EN: Leg + Bikini
+Price: 30.00
+Duration: 30
+Category: Depilação
+
+Service:
+PT: Virilha
+EN: Bikini
+Price: 12.00
+Duration: 15
+Category: Depilação
+
+Service:
+PT: Virilha Completa
+EN: Full Bikini
+Price: 17.00
+Duration: 30
+Category: Depilação
+
+Service:
+PT: Axilas
+EN: Underarms
+Price: 8.00
+Duration: 10
+Category: Depilação
+
+Service:
+PT: Buço e Queixo
+EN: Upper Lip & Chin
+Price: 5.00
+Duration: 5
+Category: Depilação
+
+Service:
+PT: Braços
+EN: Arms
+Price: 15.00
+Duration: 15
+Category: Depilação
+
+Service:
+PT: Costas e Peito
+EN: Back & Chest
+Price: 25.00
+Duration: 45
+Category: Depilação
+
+SOBRANCELHAS
+
+Service:
+PT: Design Sobrancelha + Tintura
+EN: Eyebrow Design + Tint
+Price: 15.00
+Duration: 20
+Category: Sobrancelhas
+
+Service:
+PT: SPA Eyebrow Design
+EN: SPA Eyebrow Design
+Price: 20.00
+Duration: 30
+Category: Sobrancelhas
+
+PESTANAS
+
+Service:
+PT: Volume Brasileiro
+EN: Brazilian Volume
+Price: 40.00
+Duration: 120
+Category: Pestanas
+
+Service:
+PT: Volume Egípcio
+EN: Egyptian Volume
+Price: 35.00
+Duration: 120
+Category: Pestanas
+
+Service:
+PT: Lifting de Pestana
+EN: Lash Lift
+Price: 35.00
+Duration: 120
+Category: Pestanas
+
+FACIAIS
+
+Service:
+PT: Limpeza de Pele
+EN: Facial Cleansing
+Price: 25.00
+Duration: 30
+Category: Faciais
+
+Service:
+PT: Limpeza de Pele Profunda
+EN: Deep Facial Cleansing
+Price: 45.00
+Duration: 60
+Category: Faciais
+
+Service:
+PT: Hidratação + Colagénio
+EN: Hydration + Collagen
+Price: 40.00
+Duration: 30
+Category: Faciais
+
+Keep all Portuguese and English translations.
+Keep the existing booking system intact.
+Update categories and service references automatically.

@@ -1,0 +1,14 @@
+kind = "web"
+previewPath = "/"
+title = "Mademoiselle Salon"
+
+[[services]]
+localPort = 5000
+name = "Flask App"
+paths = ["/"]
+
+[services.development]
+run = "python /home/runner/workspace/run.py"
+
+[services.env]
+PORT = "5000"

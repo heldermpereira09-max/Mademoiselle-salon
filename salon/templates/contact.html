@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}{% if lang == 'pt' %}Contacto — Mademoiselle Estética & Beleza{% else %}Contact — Mademoiselle Aesthetics & Beauty{% endif %}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <h1>{% if lang == 'pt' %}Fale Connosco{% else %}Contact Us{% endif %}</h1>
+    <p>{% if lang == 'pt' %}Estamos aqui para a atender.{% else %}We're here to serve you.{% endif %}</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container contact-container">
+    <div class="contact-info">
+      <h2>{% if lang == 'pt' %}Informações{% else %}Information{% endif %}</h2>
+      <div class="contact-item">
+        <span class="contact-icon">📍</span>
+        <div>
+          <strong>{% if lang == 'pt' %}Morada{% else %}Address{% endif %}</strong>
+          <p>Urb. St. James Lt 4 Fração U<br/>Montes da Luz, 8600-174 Luz</p>
+        </div>
+      </div>
+      <div class="contact-item">
+        <span class="contact-icon">💬</span>
+        <div>
+          <strong>WhatsApp</strong>
+          <p><a href="https://wa.me/351910668153" target="_blank" rel="noopener" class="contact-link">+351 910 668 153</a></p>
+        </div>
+      </div>
+      <div class="contact-item">
+        <span class="contact-icon">📧</span>
+        <div>
+          <strong>E-mail</strong>
+          <p><a href="mailto:dany_alves.7@hotmail.com" class="contact-link">dany_alves.7@hotmail.com</a></p>
+        </div>
+      </div>
+      <div class="contact-item">
+        <span class="contact-icon">📸</span>
+        <div>
+          <strong>Instagram</strong>
+          <p><a href="https://www.instagram.com/mademoiselle_by_danielaalves/" target="_blank" rel="noopener" class="contact-link">@mademoiselle_by_danielaalves</a></p>
+        </div>
+      </div>
+      <div class="contact-item">
+        <span class="contact-icon">🕐</span>
+        <div>
+          <strong>{% if lang == 'pt' %}Horário de Funcionamento{% else %}Opening Hours{% endif %}</strong>
+          <p>{% if lang == 'pt' %}Seg–Sex: 10h às 18h<br/>Sábado: Encerrado<br/>Domingo: Encerrado{% else %}Mon–Fri: 10am – 6pm<br/>Saturday: Closed<br/>Sunday: Closed{% endif %}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="contact-outlook">
+      <h2>{% if lang == 'pt' %}Integração com Calendário{% else %}Calendar Integration{% endif %}</h2>
+      <div class="outlook-card">
+        <div class="outlook-icon">📅</div>
+        <h3>Microsoft Outlook</h3>
+        <p>
+          {% if lang == 'pt' %}
+            Em breve, as suas marcações serão automaticamente sincronizadas com o Outlook Calendar.
+            Receberá convites de calendário diretamente no seu e-mail.
+          {% else %}
+            Coming soon: your bookings will automatically sync with Outlook Calendar.
+            You'll receive calendar invites directly to your email.
+          {% endif %}
+        </p>
+        <div class="outlook-badge">
+          {% if lang == 'pt' %}Em breve{% else %}Coming Soon{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

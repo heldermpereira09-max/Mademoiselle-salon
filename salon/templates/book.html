@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+{% block title %}{% if lang == 'pt' %}Marcação — Mademoiselle Estética & Beleza{% else %}Booking — Mademoiselle Aesthetics & Beauty{% endif %}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <h1>{% if lang == 'pt' %}Marcar Horário{% else %}Book Appointment{% endif %}</h1>
+    <p>{% if lang == 'pt' %}Preencha os dados abaixo para reservar o seu horário.{% else %}Fill in the details below to reserve your time slot.{% endif %}</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container booking-container">
+    <div id="customAlert" class="custom-alert">
+  <div class="custom-alert-box">
+    <h3>{% if lang == 'pt' %}Atenção{% else %}Attention{% endif %}</h3>
+    <p id="customAlertMessage"></p>
+    <button type="button" id="closeAlert">
+    {% if lang == 'pt' %}Fechar{% else %}Close{% endif %}
+    </button>
+  </div>
+</div>
+    <form method="POST" action="{{ url_for('main.book') }}" class="booking-form" id="bookingForm">
+      <!-- Step 1: Service -->
+      <div class="form-section">
+        <h2 class="form-section-title">
+          <span class="step-badge">1</span>
+          {% if selected_service %}
+            {% if lang == 'pt' %}Serviço Selecionado{% else %}Selected Service{% endif %}
+          {% else %}
+            {% if lang == 'pt' %}Escolha o Serviço{% else %}Choose Service{% endif %}
+          {% endif %}
+        </h2>
+
+        {% if selected_service %}
+        <input type="hidden" name="service_id" value="{{ selected_service.id }}" />
+        <div class="service-preselected-card">
+          <div class="service-preselected-body">
+            <span class="service-preselected-cat">{{ selected_service.category.name(lang) }}</span>
+            <span class="service-preselected-name">{{ selected_service.name(lang) }}</span>
+            <span class="service-preselected-price">{{ "%.2f"|format(selected_service.price) }}€</span>
+          </div>
+          <a href="{{ url_for('main.services') }}" class="service-preselected-change">
+            {% if lang == 'pt' %}← Alterar serviço{% else %}← Change service{% endif %}
+          </a>
+        </div>
+
+        {% else %}
+        <div class="service-select-grid">
+          {% for cat in categories %}
+          <div class="service-select-category">
+            <h3 class="service-select-cat-name">{{ cat.name(lang) }}</h3>
+            {% for service in cat.services if service.active %}
+            <label class="service-select-item {% if form_data.get('service_id') == service.id|string %}selected{% endif %}">
+              <input type="radio" name="service_id" value="{{ service.id }}"
+                {% if form_data.get('service_id') == service.id|string %}checked{% endif %}
+                required />
+              <div class="service-select-info">
+                <span class="service-select-name">{{ service.name(lang) }}</span>
+                <span class="service-select-meta">{{ "%.2f"|format(service.price) }}€</span>
+              </div>
+            </label>
+            {% endfor %}
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Step 2: Date & Time -->
+      <div class="form-section">
+        <h2 class="form-section-title">
+          <span class="step-badge">2</span>
+          {% if lang == 'pt' %}Data e Horário{% else %}Date & Time{% endif %}
+        </h2>
+        <div class="date-time-row">
+          <div class="form-group">
+            <label for="appointment_date">{% if lang == 'pt' %}Data{% else %}Date{% endif %}</label>
+            <input type="date" id="appointment_date" name="appointment_date"
+              value="{{ form_data.get('appointment_date', '') }}"
+              min="{{ today }}" />
+          </div>
+          <div class="form-group">
+            <label for="appointment_time">{% if lang == 'pt' %}Horário{% else %}Time{% endif %}</label>
+            <select id="appointment_time" name="appointment_time">
+              <option value="">{% if lang == 'pt' %}Selecione uma data primeiro{% else %}Select a date first{% endif %}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Personal Info -->
+      <div class="form-section">
+        <h2 class="form-section-title">
+          <span class="step-badge">3</span>
+          {% if lang == 'pt' %}Os Seus Dados{% else %}Your Details{% endif %}
+        </h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="client_name">{% if lang == 'pt' %}Nome Completo{% else %}Full Name{% endif %} *</label>
+            <input type="text" id="client_name" name="client_name"
+              value="{{ form_data.get('client_name', '') }}"
+              placeholder="{% if lang == 'pt' %}O seu nome{% else %}Your name{% endif %}" />
+          </div>
+          <div class="form-group">
+            <label for="client_email">{% if lang == 'pt' %}E-mail{% else %}Email{% endif %} </label>
+            <input type="email" id="client_email" name="client_email"
+              value="{{ form_data.get('client_email', '') }}"
+              placeholder="{% if lang == 'pt' %}o_seu@email.com{% else %}your@email.com{% endif %}" />
+          </div>
+          <div class="form-group">
+            <label for="client_phone">{% if lang == 'pt' %}Telefone / WhatsApp{% else %}Phone / WhatsApp{% endif %} *</label>
+            <input type="tel" id="client_phone" name="client_phone"
+              value="{{ form_data.get('client_phone', '') }}"
+              placeholder="+351 912 345 678" />
+          </div>
+          <div class="form-group form-group-full">
+            <label for="notes">{% if lang == 'pt' %}Observações{% else %}Notes{% endif %}</label>
+            <textarea id="notes" name="notes" rows="3"
+              placeholder="{% if lang == 'pt' %}Alguma observação especial?{% else %}Any special notes?{% endif %}">{{ form_data.get('notes', '') }}</textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="booking-preview" id="bookingPreview">
+          <h3>{% if lang == 'pt' %}Resumo da Marcação{% else %}Booking Summary{% endif %}</h3>
+
+          <p><strong>{% if lang == 'pt' %}Serviço:{% else %}Service:{% endif %}</strong> <span id="previewService">-</span></p>
+
+          <p><strong>{% if lang == 'pt' %}Data:{% else %}Date:{% endif %}</strong> <span id="previewDate">-</span></p>
+
+          <p><strong>{% if lang == 'pt' %}Hora:{% else %}Time:{% endif %}</strong> <span id="previewTime">-</span></p>
+
+          <p><strong>{% if lang == 'pt' %}Nome:{% else %}Name:{% endif %}</strong> <span id="previewName">-</span></p>
+
+          <p><strong>{% if lang == 'pt' %}Telefone:{% else %}Phone:{% endif %}</strong> <span id="previewPhone">-</span></p>
+      </div>
+      <div class="form-submit">
+        <button type="submit" class="btn btn-primary btn-lg">
+          {% if lang == 'pt' %}Confirmar Marcação{% else %}Confirm Booking{% endif %}
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<script>
+const lang = "{{ lang }}";
+const dateInput = document.getElementById("appointment_date");
+const timeSelect = document.getElementById("appointment_time");
+const serviceInputs = document.querySelectorAll("input[type='radio'][name='service_id']");
+
+function getSelectedServiceId() {
+  const checked = document.querySelector("input[type='radio'][name='service_id']:checked");
+  if (checked) return checked.value;
+  const hidden = document.querySelector("input[type='hidden'][name='service_id']");
+  return hidden ? hidden.value : null;
+}
+
+async function loadTimes() {
+  const date = dateInput.value;
+  const serviceId = getSelectedServiceId();
+  timeSelect.innerHTML = "";
+  if (!date || !serviceId) {
+    timeSelect.innerHTML = `<option value="">${lang === 'pt' ? 'Selecione serviço e data' : 'Select service and date'}</option>`;
+    return;
+  }
+  timeSelect.innerHTML = `<option value="">${lang === 'pt' ? 'A carregar...' : 'Loading...'}</option>`;
+  const res = await fetch(`/api/available-times?date=${date}&service_id=${serviceId}`);
+  const slots = await res.json();
+  if (slots.length === 0) {
+    timeSelect.innerHTML = `<option value="">${lang === 'pt' ? 'Nenhum horário disponível' : 'No slots available'}</option>`;
+  } else {
+    timeSelect.innerHTML = `<option value="">${lang === 'pt' ? 'Escolha um horário' : 'Choose a time'}</option>`;
+    slots.forEach(s => {
+      const opt = document.createElement("option");
+      opt.value = s;
+      opt.textContent = s;
+      timeSelect.appendChild(opt);
+    });
+  }
+}
+
+dateInput.addEventListener("change", loadTimes);
+serviceInputs.forEach(input => {
+  input.addEventListener("change", () => {
+    document.querySelectorAll(".service-select-item").forEach(el => el.classList.remove("selected"));
+    input.closest(".service-select-item").classList.add("selected");
+    loadTimes();
+  });
+});
+  
+const lang = "{{ lang }}";
+  
+const today = new Date().toISOString().split("T")[0];
+dateInput.setAttribute("min", today);
+const previewService = document.getElementById("previewService");
+const previewDate = document.getElementById("previewDate");
+const previewTime = document.getElementById("previewTime");
+const previewName = document.getElementById("previewName");
+const previewPhone = document.getElementById("previewPhone");
+
+const nameInput = document.getElementById("client_name");
+const phoneInput = document.getElementById("client_phone");
+
+function updateBookingPreview() {
+  const selectedService = document.querySelector("input[name='service_id']:checked");
+  const hiddenService = document.querySelector("input[name='service_id'][type='hidden']");
+    let serviceName = "-";
+
+  if (selectedService) {
+    const serviceBox = selectedService.closest(".service-select-item");
+    const nameEl = serviceBox ? serviceBox.querySelector(".service-select-name") : null;
+    if (nameEl) serviceName = nameEl.textContent.trim();
+  }
+else if (hiddenService) {
+  const preselectedName = document.querySelector(".service-preselected-name");
+  if (preselectedName) serviceName = preselectedName.textContent.trim();
+}
+  previewService.textContent = serviceName;
+  if (dateInput.value) {
+  const parts = dateInput.value.split("-");
+  previewDate.textContent = `${parts[2]}/${parts[1]}/${parts[0]}`;
+} else {
+  previewDate.textContent = "-";
+}
+  previewTime.textContent = timeSelect.value || "-";
+  previewName.textContent = nameInput.value || "-";
+  previewPhone.textContent = phoneInput.value || "-";
+}
+
+dateInput.addEventListener("change", updateBookingPreview);
+timeSelect.addEventListener("change", updateBookingPreview);
+nameInput.addEventListener("input", updateBookingPreview);
+phoneInput.addEventListener("input", updateBookingPreview);
+
+serviceInputs.forEach(input => {
+  input.addEventListener("change", updateBookingPreview);
+});
+const customAlert = document.getElementById("customAlert");
+const customAlertMessage = document.getElementById("customAlertMessage");
+const closeAlert = document.getElementById("closeAlert");
+function showAlert(message) {
+    customAlertMessage.textContent = message;
+    customAlert.classList.add("show");
+}
+
+closeAlert.addEventListener("click", function () {
+    customAlert.classList.remove("show");
+});
+const bookingForm = document.querySelector("form");
+
+bookingForm.addEventListener("submit", function (e) {
+    const service = document.querySelector("input[name='service_id']:checked") ||
+                    document.querySelector("input[name='service_id'][type='hidden']");
+    const date = document.getElementById("appointment_date");
+    const time = document.getElementById("appointment_time");
+    const name = document.getElementById("client_name");
+    const phone = document.getElementById("client_phone");
+
+    if (!service) {
+        showAlert(lang === "pt" ? "Por favor selecione um serviço." : "Please select a service.");
+        e.preventDefault();
+        return;
+    }
+
+    if (!date.value) {
+        showAlert(lang === "pt" ? "Por favor selecione uma data." : "Please select a date.");
+        date.focus();
+        e.preventDefault();
+        return;
+    }
+
+    if (!time.value) {
+        showAlert(lang === "pt" ? "Por favor selecione um horário." : "Please select a time.");
+        time.focus();
+        e.preventDefault();
+        return;
+    }
+
+    if (!name.value.trim()) {
+        showAlert(lang === "pt" ? "Por favor introduza o seu nome." : "Please enter your name.");
+        name.focus();
+        e.preventDefault();
+        return;
+    }
+
+    if (!phone.value.trim()) {
+        showAlert(lang === "pt" ? "Por favor introduza o seu número de telefone." : "Please enter your phone number.");
+        phone.focus();
+        e.preventDefault();
+        return;
+    }
+});
+updateBookingPreview();
+</script>
+{% endblock %}

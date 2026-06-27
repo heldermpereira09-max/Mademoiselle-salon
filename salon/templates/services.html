@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}{% if lang == 'pt' %}Serviços — Mademoiselle Estética & Beleza{% else %}Services — Mademoiselle Aesthetics & Beauty{% endif %}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <h1>{% if lang == 'pt' %}Os Nossos Serviços{% else %}Our Services{% endif %}</h1>
+    <p>{% if lang == 'pt' %}Escolha o serviço ideal para si e marque já o seu horário.{% else %}Choose the ideal service for you and book your appointment today.{% endif %}</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="category-nav">
+      {% for cat in categories %}
+      <a href="#cat-{{ cat.id }}" class="category-nav-item">{{ cat.name(lang) }}</a>
+      {% endfor %}
+    </div>
+
+    {% for cat in categories %}
+    <div class="service-category" id="cat-{{ cat.id }}">
+      <div class="service-category-header">
+        <h2>{{ cat.name(lang) }}</h2>
+      </div>
+      <div class="services-grid">
+        {% for service in cat.services if service.active %}
+        <div class="service-card">
+          <div class="service-card-body">
+            <h3 class="service-name">{{ service.name(lang) }}</h3>
+            <p class="service-desc">{{ service.description(lang) }}</p>
+            <div class="service-meta">
+              <span class="service-price">{{ "%.2f"|format(service.price) }}€</span>
+            </div>
+          </div>
+          <a href="{{ url_for('main.book', service_id=service.id) }}" class="btn btn-primary btn-sm">
+            {% if lang == 'pt' %}Marcar{% else %}Book{% endif %}
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
