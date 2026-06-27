@@ -98,7 +98,7 @@ def book():
         db.session.commit()
 
         flash(
-            _("Booking confirmed! We will contact you to confirm the appointment."),
+            _("Your appointment has been booked successfully! We've sent you a confirmation email with all the details of your appointment."),
             "success",
         )
         return redirect(url_for("main.booking_success", booking_id=booking.id))

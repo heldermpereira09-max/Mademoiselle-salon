@@ -1,0 +1,70 @@
+# English translations for Salon.
+# Copyright (C) 2024 Salon
+# This file is distributed under the same license as the Salon project.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Salon 1.0\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2024-06-27 00:00+0000\n"
+"PO-Revision-Date: 2024-06-27 00:00+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: English\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: salon/templates/booking_success.html
+msgid "Booking Confirmed"
+msgstr "Booking Confirmed"
+
+#: salon/templates/booking_success.html
+msgid "Your appointment has been booked successfully!"
+msgstr "Your appointment has been booked successfully!"
+
+#: salon/templates/booking_success.html
+msgid "We've sent you a confirmation email with all the details of your appointment."
+msgstr "We've sent you a confirmation email with all the details of your appointment."
+
+#: salon/templates/booking_success.html
+msgid "Service"
+msgstr "Service"
+
+#: salon/templates/booking_success.html
+msgid "Date"
+msgstr "Date"
+
+#: salon/templates/booking_success.html
+msgid "Time"
+msgstr "Time"
+
+#: salon/templates/booking_success.html
+msgid "Duration"
+msgstr "Duration"
+
+#: salon/templates/booking_success.html
+msgid "Price"
+msgstr "Price"
+
+#: salon/templates/booking_success.html
+msgid "Client"
+msgstr "Client"
+
+#: salon/templates/booking_success.html
+msgid "Email"
+msgstr "Email"
+
+#: salon/templates/booking_success.html
+msgid "New Booking"
+msgstr "New Booking"
+
+#: salon/templates/booking_success.html
+msgid "Back to Home"
+msgstr "Back to Home"
+
+#: salon/routes.py
+msgid "Your appointment has been booked successfully! We've sent you a confirmation email with all the details of your appointment."
+msgstr "Your appointment has been booked successfully! We've sent you a confirmation email with all the details of your appointment."

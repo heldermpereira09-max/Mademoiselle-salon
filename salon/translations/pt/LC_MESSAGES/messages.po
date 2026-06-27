@@ -1,0 +1,70 @@
+# Portuguese translations for Salon.
+# Copyright (C) 2024 Salon
+# This file is distributed under the same license as the Salon project.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Salon 1.0\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2024-06-27 00:00+0000\n"
+"PO-Revision-Date: 2024-06-27 00:00+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: pt\n"
+"Language-Team: Portuguese\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.12.1\n"
+
+#: salon/templates/booking_success.html
+msgid "Booking Confirmed"
+msgstr "Marcação Confirmada"
+
+#: salon/templates/booking_success.html
+msgid "Your appointment has been booked successfully!"
+msgstr "A sua marcação foi realizada com sucesso!"
+
+#: salon/templates/booking_success.html
+msgid "We've sent you a confirmation email with all the details of your appointment."
+msgstr "Enviámos um e-mail com a confirmação e todos os detalhes da sua marcação."
+
+#: salon/templates/booking_success.html
+msgid "Service"
+msgstr "Serviço"
+
+#: salon/templates/booking_success.html
+msgid "Date"
+msgstr "Data"
+
+#: salon/templates/booking_success.html
+msgid "Time"
+msgstr "Horário"
+
+#: salon/templates/booking_success.html
+msgid "Duration"
+msgstr "Duração"
+
+#: salon/templates/booking_success.html
+msgid "Price"
+msgstr "Valor"
+
+#: salon/templates/booking_success.html
+msgid "Client"
+msgstr "Cliente"
+
+#: salon/templates/booking_success.html
+msgid "Email"
+msgstr "E-mail"
+
+#: salon/templates/booking_success.html
+msgid "New Booking"
+msgstr "Nova Marcação"
+
+#: salon/templates/booking_success.html
+msgid "Back to Home"
+msgstr "Voltar ao Início"
+
+#: salon/routes.py
+msgid "Your appointment has been booked successfully! We've sent you a confirmation email with all the details of your appointment."
+msgstr "A sua marcação foi realizada com sucesso! Enviámos um e-mail com a confirmação e todos os detalhes da sua marcação."

@@ -1,57 +1,53 @@
 {% extends "base.html" %}
-{% block title %}{% if lang == 'pt' %}Marcação Confirmada — Mademoiselle Estética & Beleza{% else %}Booking Confirmed — Mademoiselle Aesthetics & Beauty{% endif %}{% endblock %}
+{% block title %}{{ _("Booking Confirmed") }} — Mademoiselle Estética & Beleza{% endblock %}
 
 {% block content %}
 <section class="section">
   <div class="container">
     <div class="success-card">
       <div class="success-icon">✦</div>
-      <h1>{% if lang == 'pt' %}Marcação Realizada!{% else %}Booking Confirmed!{% endif %}</h1>
+      <h1>{{ _("Your appointment has been booked successfully!") }}</h1>
       <p class="success-subtitle">
-        {% if lang == 'pt' %}
-          Recebemos o seu pedido. Entraremos em contacto para confirmar o seu horário.
-        {% else %}
-          We've received your request. We'll contact you to confirm your appointment.
-        {% endif %}
+        {{ _("We've sent you a confirmation email with all the details of your appointment.") }}
       </p>
 
       <div class="booking-summary">
         <div class="summary-row">
-          <span class="summary-label">{% if lang == 'pt' %}Serviço{% else %}Service{% endif %}</span>
+          <span class="summary-label">{{ _("Service") }}</span>
           <span class="summary-value">{{ booking.service.name(lang) }}</span>
         </div>
         <div class="summary-row">
-          <span class="summary-label">{% if lang == 'pt' %}Data{% else %}Date{% endif %}</span>
+          <span class="summary-label">{{ _("Date") }}</span>
           <span class="summary-value">{{ booking.appointment_date.strftime('%d/%m/%Y') }}</span>
         </div>
         <div class="summary-row">
-          <span class="summary-label">{% if lang == 'pt' %}Horário{% else %}Time{% endif %}</span>
+          <span class="summary-label">{{ _("Time") }}</span>
           <span class="summary-value">{{ booking.appointment_time.strftime('%H:%M') }}</span>
         </div>
         <div class="summary-row">
-          <span class="summary-label">{% if lang == 'pt' %}Duração{% else %}Duration{% endif %}</span>
+          <span class="summary-label">{{ _("Duration") }}</span>
           <span class="summary-value">{{ booking.service.duration_minutes }} min</span>
         </div>
         <div class="summary-row">
-          <span class="summary-label">{% if lang == 'pt' %}Valor{% else %}Price{% endif %}</span>
+          <span class="summary-label">{{ _("Price") }}</span>
           <span class="summary-value">{{ "%.2f"|format(booking.service.price) }}€</span>
         </div>
         <div class="summary-row">
-          <span class="summary-label">{% if lang == 'pt' %}Cliente{% else %}Client{% endif %}</span>
+          <span class="summary-label">{{ _("Client") }}</span>
           <span class="summary-value">{{ booking.client_name }}</span>
         </div>
         <div class="summary-row">
-          <span class="summary-label">{% if lang == 'pt' %}E-mail{% else %}Email{% endif %}</span>
+          <span class="summary-label">{{ _("Email") }}</span>
           <span class="summary-value">{{ booking.client_email }}</span>
         </div>
       </div>
 
       <div class="success-actions">
         <a href="{{ url_for('main.book') }}" class="btn btn-outline">
-          {% if lang == 'pt' %}Nova Marcação{% else %}New Booking{% endif %}
+          {{ _("New Booking") }}
         </a>
         <a href="{{ url_for('main.index') }}" class="btn btn-primary">
-          {% if lang == 'pt' %}Voltar ao Início{% else %}Back to Home{% endif %}
+          {{ _("Back to Home") }}
         </a>
       </div>
     </div>
