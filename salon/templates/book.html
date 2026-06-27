@@ -178,6 +178,8 @@ async function loadTimes() {
       opt.textContent = s;
       timeSelect.appendChild(opt);
     });
+
+    updateBookingPreview();
   }
 }
 
@@ -189,8 +191,6 @@ serviceInputs.forEach(input => {
     loadTimes();
   });
 });
-  
-const lang = "{{ lang }}";
   
 const today = new Date().toISOString().split("T")[0];
 dateInput.setAttribute("min", today);
