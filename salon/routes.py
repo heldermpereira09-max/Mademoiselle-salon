@@ -1,10 +1,80 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
+import json
+from urllib import error as urllib_error
+from urllib import request as urllib_request
+
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify, current_app, has_request_context
 from flask_babel import gettext as _, get_locale
 from .app import db
 from .models import ServiceCategory, Service, Booking
 from datetime import datetime, date, timedelta
 
 main = Blueprint("main", __name__)
+MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/i8usajk6gi1jvi2cyo02h2ylwptwqabi"
+
+
+def _get_service_name(service, lang=None):
+    if not service:
+        return ""
+
+    if hasattr(service, "name"):
+        try:
+            return service.name(lang or "pt")
+        except TypeError:
+            return service.name()
+
+    if lang == "en":
+        return getattr(service, "name_en", "") or getattr(service, "name_pt", "")
+
+    return getattr(service, "name_pt", "") or getattr(service, "name_en", "")
+
+
+def _format_booking_date(value):
+    if not value:
+        return ""
+    if isinstance(value, str):
+        return value
+    return value.strftime("%Y-%m-%d")
+
+
+def _format_booking_time(value):
+    if not value:
+        return ""
+    if isinstance(value, str):
+        return value
+    return value.strftime("%H:%M")
+
+
+def build_make_payload(booking):
+    service = booking.service if getattr(booking, "service", None) is not None else Service.query.get(booking.service_id)
+    return {
+        "service": _get_service_name(service, get_lang() if has_request_context() else "pt"),
+        "date": _format_booking_date(booking.appointment_date),
+        "time": _format_booking_time(booking.appointment_time),
+        "duration": service.duration_minutes if service else None,
+        "price": service.price if service else None,
+        "client": booking.client_name,
+        "email": booking.client_email,
+        "phone": booking.client_phone,
+        "notes": booking.notes or "",
+    }
+
+
+def send_make_webhook(booking):
+    payload = build_make_payload(booking)
+    data = json.dumps(payload).encode("utf-8")
+    req = urllib_request.Request(
+        MAKE_WEBHOOK_URL,
+        data=data,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+
+    try:
+        with urllib_request.urlopen(req, timeout=10) as response:
+            return response.status
+    except (urllib_error.URLError, TimeoutError, ValueError) as exc:
+        current_app.logger.exception("Failed to send booking webhook for booking %s: %s", booking.id, exc)
+        return None
 
 
 def get_lang():
@@ -96,6 +166,7 @@ def book():
         )
         db.session.add(booking)
         db.session.commit()
+        send_make_webhook(booking)
 
         flash(
             _("Your appointment has been booked successfully! We've sent you a confirmation email with all the details of your appointment."),
