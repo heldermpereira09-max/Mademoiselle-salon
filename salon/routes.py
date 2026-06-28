@@ -46,6 +46,22 @@ def _format_booking_time(value):
 
 def build_make_payload(booking):
     service = booking.service if getattr(booking, "service", None) is not None else Service.query.get(booking.service_id)
+
+    start_datetime = ""
+    end_datetime = ""
+    if booking.appointment_date and booking.appointment_time:
+        appointment_date = booking.appointment_date
+        appointment_time = booking.appointment_time
+        if isinstance(appointment_date, str):
+            appointment_date = datetime.strptime(appointment_date, "%Y-%m-%d").date()
+        if isinstance(appointment_time, str):
+            appointment_time = datetime.strptime(appointment_time, "%H:%M").time()
+
+        start_dt = datetime.combine(appointment_date, appointment_time)
+        start_datetime = start_dt.strftime("%Y-%m-%dT%H:%M:%S")
+        if service:
+            end_datetime = (start_dt + timedelta(minutes=service.duration_minutes)).strftime("%Y-%m-%dT%H:%M:%S")
+
     return {
         "service": _get_service_name(service, get_lang() if has_request_context() else "pt"),
         "date": _format_booking_date(booking.appointment_date),
@@ -56,6 +72,8 @@ def build_make_payload(booking):
         "email": booking.client_email,
         "phone": booking.client_phone,
         "notes": booking.notes or "",
+        "start_datetime": start_datetime,
+        "end_datetime": end_datetime,
     }
 
 

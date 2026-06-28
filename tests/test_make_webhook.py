@@ -27,6 +27,8 @@ class MakeWebhookPayloadTests(unittest.TestCase):
         self.assertEqual(payload["email"], "ana@example.com")
         self.assertEqual(payload["phone"], "912345678")
         self.assertEqual(payload["notes"], "Preferência por horário da manhã")
+        self.assertEqual(payload["start_datetime"], "2026-07-15T14:30:00")
+        self.assertEqual(payload["end_datetime"], "2026-07-15T15:30:00")
 
 
 if __name__ == "__main__":
