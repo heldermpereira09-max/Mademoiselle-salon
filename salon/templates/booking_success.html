@@ -26,7 +26,7 @@
         </div>
         <div class="summary-row">
           <span class="summary-label">{{ _("Duration") }}</span>
-          <span class="summary-value">{{ booking.service.duration_minutes }} min</span>
+          <span class="summary-value">{{ _("%(minutes)s min", minutes=booking.service.duration_minutes) }}</span>
         </div>
         <div class="summary-row">
           <span class="summary-label">{{ _("Price") }}</span>
