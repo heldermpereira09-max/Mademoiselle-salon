@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
+import requests
 from flask_babel import gettext as _, get_locale
 from .app import db
 from .models import ServiceCategory, Service, Booking
@@ -6,6 +7,7 @@ from datetime import datetime, date, timedelta
 
 main = Blueprint("main", __name__)
 
+MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/i8usajk6gi1jvi2cyo02h2ylwptwqabi"
 
 def get_lang():
     return str(get_locale())
@@ -96,6 +98,29 @@ def book():
         )
         db.session.add(booking)
         db.session.commit()
+
+        try:
+            service = Service.query.get(service_id)
+            start_datetime = datetime.combine(appt_date, appt_time)
+            end_datetime = start_datetime + timedelta(minutes=service.duration_minutes)
+
+            payload = {
+                "service": service.name_pt,
+                "date": appt_date.strftime("%d/%m/%Y"),
+                "time": appt_time.strftime("%H:%M"),
+                "duration": service.duration_minutes,
+                "price": float(service.price),
+                "client": client_name,
+                "email": client_email,
+                "phone": client_phone,
+                "notes": notes,
+                "start_datetime": start_datetime.isoformat(),
+                "end_datetime": end_datetime.isoformat(),
+            }
+
+            requests.post(MAKE_WEBHOOK_URL, json=payload, timeout=10)
+        except Exception as e:
+            print(f"Erro ao enviar webhook para Make: {e}")
 
         flash(
             _("Your appointment has been booked successfully! We've sent you a confirmation email with all the details of your appointment."),
