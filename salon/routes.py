@@ -122,7 +122,7 @@ def book():
             print(f"Erro ao enviar webhook para Make: {e}")
 
         flash(
-            _("Your appointment has been booked successfully! We've sent you a confirmation email with all the details of your appointment."),
+            "A sua marcação foi confirmada com sucesso!",
             "success",
         )
         return redirect(url_for("main.booking_success", booking_id=booking.id))
