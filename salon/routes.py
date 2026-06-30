@@ -202,7 +202,20 @@ def api_available_times():
 
     while t + timedelta(minutes=service.duration_minutes) <= end:
         slot_str = t.strftime("%H:%M")
-        if slot_str not in booked_times:
+        slot_start = t
+        slot_end = t + timedelta(minutes=service.duration_minutes)
+
+        overlaps = False
+
+        for b in existing:
+            existing_start = datetime.combine(appt_date, b.appointment_time)
+            existing_end = existing_start + timedelta(minutes=b.service.duration_minutes)
+
+            if slot_start < existing_end and slot_end > existing_start:
+                overlaps = True
+                break
+
+        if not overlaps:
             slots.append(slot_str)
         t += timedelta(minutes=30)
 
