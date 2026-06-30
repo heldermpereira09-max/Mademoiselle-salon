@@ -50,6 +50,7 @@ def _read_po_translations(po_path: str) -> dict[str, str]:
 
 def _write_mo_file(mo_path: str, translations: dict[str, str]) -> None:
     keys = sorted(translations.keys())
+
     ids = b""
     strs = b""
     offsets = []
@@ -57,17 +58,25 @@ def _write_mo_file(mo_path: str, translations: dict[str, str]) -> None:
     for key in keys:
         encoded_key = key.encode("utf-8")
         encoded_str = translations[key].encode("utf-8")
-        offsets.append((len(ids), len(encoded_key), len(strs), len(encoded_str)))
+        offsets.append((len(encoded_key), len(ids), len(encoded_str), len(strs)))
         ids += encoded_key + b"\0"
         strs += encoded_str + b"\0"
 
-    keystream_offset = 7 * 4 + len(offsets) * 16
-    trstream_offset = keystream_offset + len(ids)
+    n = len(keys)
+    orig_table_offset = 7 * 4
+    trans_table_offset = orig_table_offset + n * 8
+    ids_offset = trans_table_offset + n * 8
+    strs_offset = ids_offset + len(ids)
 
     with open(mo_path, "wb") as mo_file:
-        mo_file.write(struct.pack("Iiiiiii", 0x950412de, 0, len(offsets), keystream_offset, trstream_offset, 0, 0))
-        for orig_offset, orig_length, trans_offset, trans_length in offsets:
-            mo_file.write(struct.pack("IIII", orig_offset, orig_length, trans_offset, trans_length))
+        mo_file.write(struct.pack("Iiiiiii", 0x950412de, 0, n, orig_table_offset, trans_table_offset, 0, 0))
+
+        for orig_length, orig_offset, trans_length, trans_offset in offsets:
+            mo_file.write(struct.pack("II", orig_length, ids_offset + orig_offset))
+
+        for orig_length, orig_offset, trans_length, trans_offset in offsets:
+            mo_file.write(struct.pack("II", trans_length, strs_offset + trans_offset))
+
         mo_file.write(ids)
         mo_file.write(strs)
 
@@ -111,19 +120,17 @@ def create_app():
 
     db.init_app(app)
 
-    app.jinja_env.globals["_"] = lambda text: text
+    _compile_translations(app)
 
-    #_compile_translations(app)
+    babel = Babel()
 
-    #babel = Babel()
+    def get_locale():
+        lang = session.get("lang")
+        if lang and lang in ["pt", "en"]:
+            return lang
+        return request.accept_languages.best_match(["pt", "en"], default="pt")
 
-    #def get_locale():
-    #    lang = session.get("lang")
-     #   if lang and lang in ["pt", "en"]:
-      #      return lang
-       # return request.accept_languages.best_match(["pt", "en"], default="pt")
-
-    #babel.init_app(app, locale_selector=get_locale)
+    babel.init_app(app, locale_selector=get_locale)
 
     from .routes import main
     app.register_blueprint(main)
