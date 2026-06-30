@@ -48,15 +48,15 @@ def book():
 
         errors = []
         if not client_name:
-            errors.append(_("Name is required."))
+            errors.append("Name is required.")
         if not client_phone:
-            errors.append(_("Phone is required."))   
+            errors.append("Phone is required.")   
         if not service_id:
-            errors.append(_("Please select a service."))
+            errors.append("Please select a service.")
         if not appt_date_str:
-            errors.append(_("Please select a date."))
+            errors.append("Please select a date.")
         if not appt_time_str:
-            errors.append(_("Please select a time."))
+            errors.append("Please select a time.")
 
         appt_date = None
         appt_time = None
@@ -64,14 +64,14 @@ def book():
             try:
                 appt_date = datetime.strptime(appt_date_str, "%Y-%m-%d").date()
                 if appt_date < date.today():
-                    errors.append(_("Please select a future date."))
+                    errors.append("Please select a future date.")
             except ValueError:
-                errors.append(_("Invalid date format."))
+                errors.append("Invalid date format.")
         if appt_time_str:
             try:
                 appt_time = datetime.strptime(appt_time_str, "%H:%M").time()
             except ValueError:
-                errors.append(_("Invalid time format."))
+                errors.append("Invalid time format.")
 
         if errors:
             for err in errors:
