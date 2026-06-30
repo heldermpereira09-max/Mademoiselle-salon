@@ -84,10 +84,13 @@ def _compile_translations(app: Flask) -> None:
         if not os.path.exists(po_path):
             continue
 
-        if not os.path.exists(mo_path) or os.path.getmtime(po_path) > os.path.getmtime(mo_path):
-            os.makedirs(os.path.dirname(mo_path), exist_ok=True)
+        os.makedirs(os.path.dirname(mo_path), exist_ok=True)
+
+        try:
             translations = _read_po_translations(po_path)
             _write_mo_file(mo_path, translations)
+        except Exception as e:
+            print(f"Erro ao compilar traduções {lang}: {e}")
 
 
 load_dotenv()
