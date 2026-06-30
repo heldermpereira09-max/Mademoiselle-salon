@@ -1,6 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 import requests
-from flask_babel import gettext as _, get_locale
 from .app import db
 from .models import ServiceCategory, Service, Booking
 from datetime import datetime, date, timedelta
@@ -9,7 +8,7 @@ main = Blueprint("main", __name__)
 MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/i8usajk6gi1jvi2cyo02h2ylwptwqabi"
 
 def get_lang():
-    return str(get_locale())
+    return session.get("lang", "pt")
 
 
 @main.route("/set-lang/<lang>")

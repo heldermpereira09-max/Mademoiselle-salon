@@ -111,17 +111,19 @@ def create_app():
 
     db.init_app(app)
 
-    _compile_translations(app)
+    app.jinja_env.globals["_"] = lambda text: text
 
-    babel = Babel()
+    #_compile_translations(app)
 
-    def get_locale():
-        lang = session.get("lang")
-        if lang and lang in ["pt", "en"]:
-            return lang
-        return request.accept_languages.best_match(["pt", "en"], default="pt")
+    #babel = Babel()
 
-    babel.init_app(app, locale_selector=get_locale)
+    #def get_locale():
+    #    lang = session.get("lang")
+     #   if lang and lang in ["pt", "en"]:
+      #      return lang
+       # return request.accept_languages.best_match(["pt", "en"], default="pt")
+
+    #babel.init_app(app, locale_selector=get_locale)
 
     from .routes import main
     app.register_blueprint(main)
