@@ -204,6 +204,11 @@ def api_available_times():
         slot_str = t.strftime("%H:%M")
         slot_start = t
         slot_end = t + timedelta(minutes=service.duration_minutes)
+        
+        now = datetime.now()
+        if appt_date == date.today() and t <= now:
+            t += timedelta(minutes=30)
+            continue
 
         overlaps = False
 
