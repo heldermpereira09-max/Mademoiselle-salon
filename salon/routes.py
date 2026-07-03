@@ -273,6 +273,12 @@ def api_available_times():
                     overlaps = True
                     break
 
+        print(
+            slot_str,
+            "overlaps =", overlaps,
+            "outlook_busy =", outlook_busy
+        )
+
         if not overlaps:
             slots.append(slot_str)
         t += timedelta(minutes=30)
