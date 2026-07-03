@@ -197,8 +197,10 @@ def api_available_times():
         )
 
         if response.status_code == 200:
+           print("STATUS Make:", response.status_code)
+           print("RESPOSTA Make:", response.text)
+
            outlook_events = response.json()
-           print("Outlook:", outlook_events)
         else:
            outlook_events = []
 
