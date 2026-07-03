@@ -214,12 +214,19 @@ def api_available_times():
                 start_str = event["start"]["dateTime"]
                 end_str = event["end"]["dateTime"]
 
-                start_dt = datetime.fromisoformat(start_str.replace("Z", ""))
-                end_dt = datetime.fromisoformat(end_str.replace("Z", ""))
+                # Remove milissegundos do Outlook
+                start_str = start_str.split(".")[0]
+                end_str = end_str.split(".")[0]
+
+                start_dt = datetime.fromisoformat(start_str)
+                end_dt = datetime.fromisoformat(end_str)
 
                 outlook_busy.append((start_dt, end_dt))
+
             except Exception as e:
-                print("Erro ao ler evento Outlook:", e)   
+                print("Erro ao ler evento Outlook:", e)
+
+    print("Horas ocupadas Outlook:", outlook_busy)   
 
     existing = Booking.query.filter_by(appointment_date=appt_date).all()
     booked_times = set()
