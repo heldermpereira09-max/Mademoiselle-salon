@@ -201,10 +201,25 @@ def api_available_times():
            print("Outlook:", outlook_events)
         else:
            outlook_events = []
-           
+
     except Exception as e:
         print("Erro ao consultar Outlook:", e)
         outlook_events = []
+
+    outlook_busy = []
+
+    if isinstance(outlook_events, dict):
+        for event in outlook_events.get("value", []):
+            try:
+                start_str = event["start"]["dateTime"]
+                end_str = event["end"]["dateTime"]
+
+                start_dt = datetime.fromisoformat(start_str.replace("Z", ""))
+                end_dt = datetime.fromisoformat(end_str.replace("Z", ""))
+
+                outlook_busy.append((start_dt, end_dt))
+            except Exception as e:
+                print("Erro ao ler evento Outlook:", e)   
 
     existing = Booking.query.filter_by(appointment_date=appt_date).all()
     booked_times = set()
@@ -243,6 +258,11 @@ def api_available_times():
             if slot_start < existing_end and slot_end > existing_start:
                 overlaps = True
                 break
+
+            for existing_start, existing_end in outlook_busy:
+                if slot_start < existing_end and slot_end > existing_start:
+                    overlaps = True
+                    break
 
         if not overlaps:
             slots.append(slot_str)
