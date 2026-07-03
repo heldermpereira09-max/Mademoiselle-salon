@@ -179,6 +179,10 @@ def api_available_times():
 
     if appt_date < date.today():
         return jsonify([])
+    
+    # Fechado ao sábado e domingo
+    if appt_date.weekday() in [5, 6]:
+        return jsonify([])
 
     service = Service.query.get(service_id)
     if not service:
@@ -206,7 +210,9 @@ def api_available_times():
         slot_end = t + timedelta(minutes=service.duration_minutes)
         
         now = datetime.now()
-        if appt_date == date.today() and t <= now:
+        booking_limit = now + timedelta(hours=2)
+
+        if appt_date == date.today() and slot_start < booking_limit:
             t += timedelta(minutes=30)
             continue
 
