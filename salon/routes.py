@@ -5,6 +5,7 @@ from .models import ServiceCategory, Service, Booking
 from datetime import datetime, date, timedelta
 
 main = Blueprint("main", __name__)
+AVAILABILITY_WEBHOOK_URL = "https://hook.eu1.make.com/awukxncixk8n2guc1bon25f2oi27krfv"
 MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/i8usajk6gi1jvi2cyo02h2ylwptwqabi"
 
 def get_lang():
@@ -187,6 +188,23 @@ def api_available_times():
     service = Service.query.get(service_id)
     if not service:
         return jsonify([])
+    
+    try:
+        response = requests.post(
+            AVAILABILITY_WEBHOOK_URL,
+            json={"date": date_str},
+            timeout=10
+        )
+
+        if response.status_code == 200:
+           outlook_events = response.json()
+           print("Outlook:", outlook_events)
+        else:
+           outlook_events = []
+           
+    except Exception as e:
+        print("Erro ao consultar Outlook:", e)
+        outlook_events = []
 
     existing = Booking.query.filter_by(appointment_date=appt_date).all()
     booked_times = set()
