@@ -269,6 +269,9 @@ def api_available_times():
                 break
 
             for existing_start, existing_end in outlook_busy:
+                print("SLOT:", slot_start, slot_end)
+                print("OUTLOOK:", existing_start, existing_end)
+                
                 if slot_start < existing_end and slot_end > existing_start:
                     overlaps = True
                     break
