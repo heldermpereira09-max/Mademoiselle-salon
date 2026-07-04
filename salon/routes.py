@@ -186,6 +186,7 @@ def api_available_times():
         return jsonify([])
 
     service = Service.query.get(service_id)
+    print("SERVIÇO:", service_id, service.name_pt, service.duration_minutes)
     if not service:
         return jsonify([])
     
