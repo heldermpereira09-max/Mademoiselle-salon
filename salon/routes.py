@@ -187,7 +187,6 @@ def api_available_times():
         return jsonify([])
 
     service = Service.query.get(service_id)
-    print("SERVIÇO:", service_id, service.name_pt, service.duration_minutes)
     if not service:
         return jsonify([])
     
@@ -199,8 +198,6 @@ def api_available_times():
         )
 
         if response.status_code == 200:
-           print("STATUS Make:", response.status_code)
-           print("RESPOSTA Make:", response.text)
 
            outlook_events = response.json()
         else:
@@ -236,14 +233,10 @@ def api_available_times():
                     .replace(tzinfo=None)
                 )
 
-                print("OUTLOOK CONVERTIDO:", start_dt, end_dt)
-
                 outlook_busy.append((start_dt, end_dt))
 
             except Exception as e:
-                print("Erro ao ler evento Outlook:", e)
-
-    print("Horas ocupadas Outlook:", outlook_busy)   
+                print("Erro ao ler evento Outlook:", e)   
 
     existing = Booking.query.filter_by(appointment_date=appt_date).all()
     booked_times = set()
@@ -253,7 +246,7 @@ def api_available_times():
         t = start
         while t < end:
             booked_times.add(t.strftime("%H:%M"))
-            t += timedelta(minutes=30)
+            t += timedelta(minutes=15)
 
     slots = []
     start_hour = 9
@@ -270,7 +263,7 @@ def api_available_times():
         booking_limit = now + timedelta(hours=2)
 
         if appt_date == date.today() and slot_start < booking_limit:
-            t += timedelta(minutes=30)
+            t += timedelta(minutes=15)
             continue
 
         overlaps = False
@@ -286,23 +279,14 @@ def api_available_times():
         # Verificar eventos do Outlook
         if not overlaps:
             for existing_start, existing_end in outlook_busy:
-                print("SLOT:", slot_start, slot_end)
-                print("OUTLOOK:", existing_start, existing_end)
-                print("TIPOS:", type(slot_start), type(existing_start))
 
                 if slot_start < existing_end and slot_end > existing_start:
                     overlaps = True
                     break
 
-        print(
-            slot_str,
-            "overlaps =", overlaps,
-            "outlook_busy =", outlook_busy
-        )
-
         if not overlaps:
             slots.append(slot_str)
-        t += timedelta(minutes=30)
+        t += timedelta(minutes=15)
 
     return jsonify(slots)
 
