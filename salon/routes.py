@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 import requests
 from .app import db
 from .models import ServiceCategory, Service, Booking
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
 
 main = Blueprint("main", __name__)
 AVAILABILITY_WEBHOOK_URL = "https://hook.eu1.make.com/awukxncixk8n2guc1bon25f2oi27krfv"
@@ -221,8 +221,8 @@ def api_available_times():
                 start_str = start_str.split(".")[0]
                 end_str = end_str.split(".")[0]
 
-                start_dt = datetime.fromisoformat(start_str)
-                end_dt = datetime.fromisoformat(end_str)
+                start_dt = datetime.fromisoformat(start_str).replace(tzinfo=timezone.utc).astimezone().replace(tzinfo=None)
+                end_dt = datetime.fromisoformat(end_str).replace(tzinfo=timezone.utc).astimezone().replace(tzinfo=None)
 
                 outlook_busy.append((start_dt, end_dt))
 
