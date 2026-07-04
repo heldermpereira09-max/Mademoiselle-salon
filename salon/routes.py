@@ -3,6 +3,7 @@ import requests
 from .app import db
 from .models import ServiceCategory, Service, Booking
 from datetime import datetime, date, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 main = Blueprint("main", __name__)
 AVAILABILITY_WEBHOOK_URL = "https://hook.eu1.make.com/awukxncixk8n2guc1bon25f2oi27krfv"
@@ -221,8 +222,21 @@ def api_available_times():
                 start_str = start_str.split(".")[0]
                 end_str = end_str.split(".")[0]
 
-                start_dt = datetime.fromisoformat(start_str).replace(tzinfo=timezone.utc).astimezone().replace(tzinfo=None)
-                end_dt = datetime.fromisoformat(end_str).replace(tzinfo=timezone.utc).astimezone().replace(tzinfo=None)
+                start_dt = (
+                    datetime.fromisoformat(start_str)
+                    .replace(tzinfo=timezone.utc)
+                    .astimezone(ZoneInfo("Europe/Lisbon"))
+                    .replace(tzinfo=None)
+                )
+
+                end_dt = (
+                    datetime.fromisoformat(end_str)
+                    .replace(tzinfo=timezone.utc)
+                    .astimezone(ZoneInfo("Europe/Lisbon"))
+                    .replace(tzinfo=None)
+                )
+
+                print("OUTLOOK CONVERTIDO:", start_dt, end_dt)
 
                 outlook_busy.append((start_dt, end_dt))
 
