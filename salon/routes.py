@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 import requests
 from .app import db
-from .models import Salon, ServiceCategory, Service, Booking
+from .models.models import Salon, ServiceCategory, Service, Booking
 from datetime import datetime, date, timedelta, timezone
 from zoneinfo import ZoneInfo
 
