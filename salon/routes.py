@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 import requests
 from .app import db
-from .models import ServiceCategory, Service, Booking
+from .models import Salon, ServiceCategory, Service, Booking
 from datetime import datetime, date, timedelta, timezone
 from zoneinfo import ZoneInfo
 
@@ -9,8 +9,19 @@ main = Blueprint("main", __name__)
 AVAILABILITY_WEBHOOK_URL = "https://hook.eu1.make.com/awukxncixk8n2guc1bon25f2oi27krfv"
 MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/i8usajk6gi1jvi2cyo02h2ylwptwqabi"
 
+
 def get_lang():
     return session.get("lang", "pt")
+
+
+def get_selected_salon():
+    slug = session.get("salon_slug", "lagos")
+    salon = Salon.query.filter_by(slug=slug).first()
+
+    if not salon:
+        salon = Salon.query.first()
+
+    return salon
 
 
 @main.route("/set-lang/<lang>")
@@ -20,105 +31,225 @@ def set_lang(lang):
     return redirect(request.referrer or url_for("main.index"))
 
 
+@main.route("/set-salon/<slug>")
+def set_salon(slug):
+    salon = Salon.query.filter_by(slug=slug).first_or_404()
+    session["salon_slug"] = salon.slug
+    return redirect(url_for("main.index"))
+
+
 @main.route("/")
 def index():
-    categories = ServiceCategory.query.order_by(ServiceCategory.display_order).all()
-    return render_template("index.html", categories=categories, lang=get_lang())
+    salon = get_selected_salon()
+    salons = Salon.query.order_by(Salon.name).all()
+
+    categories = (
+        ServiceCategory.query
+        .filter_by(salon_id=salon.id)
+        .order_by(ServiceCategory.display_order)
+        .all()
+    )
+
+    return render_template(
+        "index.html",
+        salons=salons,
+        salon=salon,
+        categories=categories,
+        lang=get_lang(),
+    )
 
 
 @main.route("/services")
 def services():
-    categories = ServiceCategory.query.order_by(ServiceCategory.display_order).all()
-    return render_template("services.html", categories=categories, lang=get_lang())
+    salon = get_selected_salon()
+    salons = Salon.query.order_by(Salon.name).all()
 
+    categories = (
+        ServiceCategory.query
+        .filter_by(salon_id=salon.id)
+        .order_by(ServiceCategory.display_order)
+        .all()
+    )
+
+    return render_template(
+        "services.html",
+        salons=salons,
+        salon=salon,
+        categories=categories,
+        lang=get_lang(),
+    )
 
 @main.route("/book", methods=["GET", "POST"])
 def book():
-    categories = ServiceCategory.query.order_by(ServiceCategory.display_order).all()
+
+    salon = get_selected_salon()
+
+    categories = (
+        ServiceCategory.query
+        .filter_by(salon_id=salon.id)
+        .order_by(ServiceCategory.display_order)
+        .all()
+    )
+
     service_id = request.args.get("service_id", type=int)
-    selected_service = Service.query.get(service_id) if service_id else None
+
+    selected_service = None
+
+    if service_id:
+        selected_service = (
+            Service.query
+            .join(ServiceCategory)
+            .filter(
+                Service.id == service_id,
+                ServiceCategory.salon_id == salon.id
+            )
+            .first()
+        )
 
     if request.method == "POST":
+
         client_name = request.form.get("client_name", "").strip()
         client_email = request.form.get("client_email", "").strip()
         client_phone = request.form.get("client_phone", "").strip()
+
         service_id = request.form.get("service_id", type=int)
+
         appt_date_str = request.form.get("appointment_date", "").strip()
         appt_time_str = request.form.get("appointment_time", "").strip()
+
         notes = request.form.get("notes", "").strip()
 
+        service = (
+            Service.query
+            .join(ServiceCategory)
+            .filter(
+                Service.id == service_id,
+                ServiceCategory.salon_id == salon.id
+            )
+            .first()
+        )
+
         errors = []
+
         if not client_name:
             errors.append("Name is required.")
+
         if not client_phone:
-            errors.append("Phone is required.")   
-        if not service_id:
-            errors.append("Please select a service.")
+            errors.append("Phone is required.")
+
+        if not service:
+            errors.append("Please select a valid service.")
+
         if not appt_date_str:
             errors.append("Please select a date.")
+
         if not appt_time_str:
             errors.append("Please select a time.")
 
         appt_date = None
         appt_time = None
+
         if appt_date_str:
             try:
-                appt_date = datetime.strptime(appt_date_str, "%Y-%m-%d").date()
+                appt_date = datetime.strptime(
+                    appt_date_str,
+                    "%Y-%m-%d"
+                ).date()
+
                 if appt_date < date.today():
                     errors.append("Please select a future date.")
+
             except ValueError:
                 errors.append("Invalid date format.")
+
         if appt_time_str:
             try:
-                appt_time = datetime.strptime(appt_time_str, "%H:%M").time()
+                appt_time = datetime.strptime(
+                    appt_time_str,
+                    "%H:%M"
+                ).time()
+
             except ValueError:
                 errors.append("Invalid time format.")
 
         if errors:
+
             for err in errors:
                 flash(err, "danger")
+
             return render_template(
                 "book.html",
+                salon=salon,
+                salons=Salon.query.order_by(Salon.name).all(),
                 categories=categories,
-                selected_service=Service.query.get(service_id) if service_id else None,
+                selected_service=service,
                 lang=get_lang(),
                 form_data=request.form,
                 today=date.today().isoformat(),
             )
 
         booking = Booking(
+
+            salon_id=salon.id,
+
             client_name=client_name,
             client_email=client_email,
             client_phone=client_phone,
-            service_id=service_id,
+
+            service_id=service.id,
+
             appointment_date=appt_date,
             appointment_time=appt_time,
+
             notes=notes,
+
             status="pending",
         )
+
         db.session.add(booking)
         db.session.commit()
-        
+
         try:
-            service = Service.query.get(service_id)
-            start_datetime = datetime.combine(appt_date, appt_time)
-            end_datetime = start_datetime + timedelta(minutes=service.duration_minutes)
+
+            start_datetime = datetime.combine(
+                appt_date,
+                appt_time
+            )
+
+            end_datetime = (
+                start_datetime +
+                timedelta(minutes=service.duration_minutes)
+            )
 
             payload = {
+
+                "salon": salon.slug,
+                "salon_name": salon.name,
+
                 "service": service.name_pt,
+
                 "date": appt_date.strftime("%d/%m/%Y"),
                 "time": appt_time.strftime("%H:%M"),
+
                 "duration": service.duration_minutes,
                 "price": float(service.price),
+
                 "client": client_name,
                 "email": client_email,
                 "phone": client_phone,
+
                 "notes": notes,
+
                 "start_datetime": start_datetime.isoformat(),
                 "end_datetime": end_datetime.isoformat(),
             }
 
-            requests.post(MAKE_WEBHOOK_URL, json=payload, timeout=10)
+            requests.post(
+                MAKE_WEBHOOK_URL,
+                json=payload,
+                timeout=10
+            )
+
         except Exception as e:
             print(f"Erro ao enviar webhook para Make: {e}")
 
@@ -126,10 +257,18 @@ def book():
             "A sua marcação foi confirmada com sucesso!",
             "success",
         )
-        return redirect(url_for("main.booking_success", booking_id=booking.id))
+
+        return redirect(
+            url_for(
+                "main.booking_success",
+                booking_id=booking.id,
+            )
+        )
 
     return render_template(
         "book.html",
+        salon=salon,
+        salons=Salon.query.order_by(Salon.name).all(),
         categories=categories,
         selected_service=selected_service,
         lang=get_lang(),
@@ -146,24 +285,51 @@ def booking_success(booking_id):
 
 @main.route("/api/services")
 def api_services():
+
+    salon = get_selected_salon()
     lang = get_lang()
-    categories = ServiceCategory.query.order_by(ServiceCategory.display_order).all()
+
+    categories = (
+        ServiceCategory.query
+        .filter_by(salon_id=salon.id)
+        .order_by(ServiceCategory.display_order)
+        .all()
+    )
+
     result = []
+
     for cat in categories:
+
         result.append({
+
             "id": cat.id,
+
             "name": cat.name(lang),
+
             "services": [
+
                 {
+
                     "id": s.id,
+
                     "name": s.name(lang),
+
                     "description": s.description(lang),
+
                     "duration_minutes": s.duration_minutes,
+
                     "price": s.price,
+
                 }
-                for s in cat.services if s.active
+
+                for s in cat.services
+
+                if s.active
+
             ],
+
         })
+
     return jsonify(result)
 
 
@@ -238,7 +404,12 @@ def api_available_times():
             except Exception as e:
                 print("Erro ao ler evento Outlook:", e)   
 
-    existing = Booking.query.filter_by(appointment_date=appt_date).all()
+    salon = get_selected_salon()
+
+    existing = Booking.query.filter_by(
+    salon_id=salon.id,
+    appointment_date=appt_date
+    ).all()
     booked_times = set()
     for b in existing:
         start = datetime.combine(appt_date, b.appointment_time)

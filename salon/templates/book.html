@@ -5,7 +5,42 @@
 <section class="page-hero">
   <div class="container">
     <h1>{% if lang == 'pt' %}Marcar Horário{% else %}Book Appointment{% endif %}</h1>
-    <p>{% if lang == 'pt' %}Preencha os dados abaixo para reservar o seu horário.{% else %}Fill in the details below to reserve your time slot.{% endif %}</p>
+    <p>
+    {% if lang == 'pt' %}
+    Preencha os dados abaixo para reservar o seu horário em <strong>{{ salon.name }}</strong>.
+    {% else %}
+    Fill in the details below to reserve your appointment at <strong>{{ salon.name }}</strong>.
+    {% endif %}
+    </p>
+  </div>
+</section>
+
+<section class="location-selector">
+  <div class="container">
+
+    <h3 style="text-align:center; margin-bottom:20px;">
+      📍 {% if lang == 'pt' %}
+      Escolha a localização
+      {% else %}
+      Choose your location
+      {% endif %}
+    </h3>
+
+    <div style="display:flex; justify-content:center; gap:15px; flex-wrap:wrap;">
+
+      {% for s in salons %}
+
+      <a href="{{ url_for('main.set_salon', slug=s.slug) }}"
+         class="btn {% if salon.id == s.id %}btn-primary{% else %}btn-outline{% endif %}">
+
+        {{ s.name }}
+
+      </a>
+
+      {% endfor %}
+
+    </div>
+
   </div>
 </section>
 

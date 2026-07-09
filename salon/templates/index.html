@@ -33,6 +33,35 @@
   </div>
 </section>
 
+<section class="location-selector">
+  <div class="container">
+
+    <h3 style="text-align:center; margin-bottom:20px;">
+      📍 {% if lang == 'pt' %}
+      Escolha a localização
+      {% else %}
+      Choose your location
+      {% endif %}
+    </h3>
+
+    <div style="display:flex; justify-content:center; gap:15px; flex-wrap:wrap;">
+
+      {% for s in salons %}
+
+      <a href="{{ url_for('main.set_salon', slug=s.slug) }}"
+         class="btn {% if salon.id == s.id %}btn-primary{% else %}btn-outline{% endif %}">
+
+        {{ s.name }}
+
+      </a>
+
+      {% endfor %}
+
+    </div>
+
+  </div>
+</section>
+
 <!-- Showcase Image -->
 <section class="showcase-section">
   <div class="container showcase-inner">

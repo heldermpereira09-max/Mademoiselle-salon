@@ -2,13 +2,47 @@ from datetime import datetime
 from ..app import db
 
 
+class Salon(db.Model):
+    __tablename__ = "salons"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    slug = db.Column(db.String(100), unique=True, nullable=False)
+
+    categories = db.relationship(
+        "ServiceCategory",
+        back_populates="salon",
+        cascade="all, delete-orphan"
+    )
+
+    bookings = db.relationship(
+        "Booking",
+        back_populates="salon",
+        cascade="all, delete-orphan"
+    )
+
+
 class ServiceCategory(db.Model):
     __tablename__ = "service_categories"
+
     id = db.Column(db.Integer, primary_key=True)
+
+    salon_id = db.Column(
+        db.Integer,
+        db.ForeignKey("salons.id"),
+        nullable=False
+    )
+
+    salon = db.relationship(
+        "Salon",
+        back_populates="categories"
+    )
+
     name_pt = db.Column(db.String(100), nullable=False)
     name_en = db.Column(db.String(100), nullable=False)
     icon = db.Column(db.String(50), default="sparkles")
     display_order = db.Column(db.Integer, default=0)
+
     services = db.relationship("Service", back_populates="category", lazy=True)
 
     def name(self, lang="pt"):
@@ -17,6 +51,7 @@ class ServiceCategory(db.Model):
 
 class Service(db.Model):
     __tablename__ = "services"
+
     id = db.Column(db.Integer, primary_key=True)
     name_pt = db.Column(db.String(100), nullable=False)
     name_en = db.Column(db.String(100), nullable=False)
@@ -24,7 +59,13 @@ class Service(db.Model):
     description_en = db.Column(db.Text)
     duration_minutes = db.Column(db.Integer, default=60)
     price = db.Column(db.Float, nullable=False)
-    category_id = db.Column(db.Integer, db.ForeignKey("service_categories.id"), nullable=False)
+
+    category_id = db.Column(
+        db.Integer,
+        db.ForeignKey("service_categories.id"),
+        nullable=False
+    )
+
     category = db.relationship("ServiceCategory", back_populates="services")
     active = db.Column(db.Boolean, default=True)
 
@@ -37,12 +78,26 @@ class Service(db.Model):
 
 class Booking(db.Model):
     __tablename__ = "bookings"
+
     id = db.Column(db.Integer, primary_key=True)
     client_name = db.Column(db.String(100), nullable=False)
     client_email = db.Column(db.String(150), nullable=False)
     client_phone = db.Column(db.String(30))
+
+    salon_id = db.Column(
+        db.Integer,
+        db.ForeignKey("salons.id"),
+        nullable=False
+    )
+
+    salon = db.relationship(
+        "Salon",
+        back_populates="bookings"
+    )
+
     service_id = db.Column(db.Integer, db.ForeignKey("services.id"), nullable=False)
     service = db.relationship("Service")
+
     appointment_date = db.Column(db.Date, nullable=False)
     appointment_time = db.Column(db.Time, nullable=False)
     notes = db.Column(db.Text)
@@ -56,146 +111,93 @@ class Booking(db.Model):
 
 
 def seed_data():
-    if ServiceCategory.query.first():
+    if Salon.query.first():
         return
 
-    categories = [
-        ServiceCategory(name_pt="Pedicure",     name_en="Pedicure",   icon="sparkles", display_order=1),
-        ServiceCategory(name_pt="Manicure",     name_en="Manicure",   icon="hand",     display_order=2),
-        ServiceCategory(name_pt="Depilação",    name_en="Waxing",     icon="leaf",     display_order=3),
-        ServiceCategory(name_pt="Sobrancelhas", name_en="Eyebrows",   icon="palette",  display_order=4),
-        ServiceCategory(name_pt="Pestanas",     name_en="Eyelashes",  icon="scissors", display_order=5),
-        ServiceCategory(name_pt="Faciais",      name_en="Facials",    icon="flower",   display_order=6),
-    ]
-    db.session.add_all(categories)
+    lagos = Salon(name="Lagos", slug="lagos")
+    luz = Salon(name="Praia da Luz", slug="praia-da-luz")
+
+    db.session.add_all([lagos, luz])
     db.session.flush()
 
-    pedicure, manicure, depilacao, sobrancelhas, pestanas, faciais = categories
+    def criar_categorias(salon):
+        categorias = {
+            "pedicure": ServiceCategory(name_pt="Pedicure", name_en="Pedicure", icon="sparkles", display_order=1, salon=salon),
+            "manicure": ServiceCategory(name_pt="Manicure", name_en="Manicure", icon="hand", display_order=2, salon=salon),
+            "depilacao": ServiceCategory(name_pt="Depilação", name_en="Waxing", icon="leaf", display_order=3, salon=salon),
+            "sobrancelhas": ServiceCategory(name_pt="Sobrancelhas", name_en="Eyebrows", icon="palette", display_order=4, salon=salon),
+            "pestanas": ServiceCategory(name_pt="Pestanas", name_en="Eyelashes", icon="scissors", display_order=5, salon=salon),
+            "faciais": ServiceCategory(name_pt="Faciais", name_en="Facials", icon="flower", display_order=6, salon=salon),
+            "massagem": ServiceCategory(name_pt="Massagem", name_en="Massage", icon="flower", display_order=7, salon=salon),
+        }
+        db.session.add_all(categorias.values())
+        db.session.flush()
+        return categorias
 
-    services = [
-        # ── Pedicure ──────────────────────────────────────────────────────
-        Service(name_pt="Pedicure Normal", name_en="Regular Pedicure",
-                description_pt="Pedicure clássica com cuidado completo dos pés.",
-                description_en="Classic pedicure with complete foot care.",
-                duration_minutes=30, price=25.00, category=pedicure),
-        Service(name_pt="Pedicure SPA", name_en="SPA Pedicure",
-                description_pt="Pedicure relaxante com tratamento SPA.",
-                description_en="Relaxing pedicure with SPA treatment.",
-                duration_minutes=40, price=40.00, category=pedicure),
-        Service(name_pt="Verniz Gel / Shellac", name_en="Gel Polish / Shellac",
-                description_pt="Verniz gel de longa duração com acabamento perfeito.",
-                description_en="Long-lasting gel polish with a perfect finish.",
-                duration_minutes=60, price=35.00, category=pedicure),
-        Service(name_pt="Cortar + Pintar", name_en="Cut + Paint",
-                description_pt="Corte e pintura das unhas dos pés.",
-                description_en="Nail cut and polish for feet.",
-                duration_minutes=15, price=12.50, category=pedicure),
+    cat_lagos = criar_categorias(lagos)
+    cat_luz = criar_categorias(luz)
 
-        # ── Manicure ──────────────────────────────────────────────────────
-        Service(name_pt="Manicure Normal", name_en="Regular Manicure",
-                description_pt="Manicure clássica com cuidado completo das mãos.",
-                description_en="Classic manicure with complete hand care.",
-                duration_minutes=30, price=15.00, category=manicure),
-        Service(name_pt="SPA das Mãos", name_en="Hand SPA",
-                description_pt="Tratamento SPA hidratante para as mãos.",
-                description_en="Moisturising SPA treatment for hands.",
-                duration_minutes=30, price=25.00, category=manicure),
-        Service(name_pt="Verniz Gel Shellac", name_en="Shellac Gel Polish",
-                description_pt="Verniz gel shellac de longa duração.",
-                description_en="Long-lasting shellac gel polish.",
-                duration_minutes=60, price=25.00, category=manicure),
-        Service(name_pt="Aplicação Gel", name_en="Gel Nail Application",
-                description_pt="Aplicação de gel para unhas resistentes e elegantes.",
-                description_en="Gel nail application for strong and elegant nails.",
-                duration_minutes=90, price=45.00, category=manicure),
-        Service(name_pt="Manutenção Gel", name_en="Gel Maintenance",
-                description_pt="Manutenção e retoque das unhas em gel.",
-                description_en="Maintenance and touch-up of gel nails.",
-                duration_minutes=60, price=30.00, category=manicure),
-        Service(name_pt="Gel Manicure Francesa", name_en="French Gel Manicure",
-                description_pt="Manicure francesa em gel com acabamento clássico.",
-                description_en="French gel manicure with a classic finish.",
-                duration_minutes=120, price=35.00, category=manicure),
-        Service(name_pt="Remover Gel", name_en="Gel Removal",
-                description_pt="Remoção segura do gel com cuidado das unhas.",
-                description_en="Safe gel removal with nail care.",
-                duration_minutes=30, price=12.50, category=manicure),
+    servicos_base = [
+        ("pedicure", "Pedicure Completa", "Complete Pedicure", "Pedicure completa com cuidado dos pés.", "Complete pedicure with foot care.", 30, 20.00, 25.00),
+        ("pedicure", "SPA Pedicure", "SPA Pedicure", "Pedicure relaxante com tratamento SPA.", "Relaxing pedicure with SPA treatment.", 40, 30.00, 40.00),
+        ("pedicure", "Verniz de Gel", "Gel Polish", "Verniz gel de longa duração.", "Long-lasting gel polish.", 60, 28.00, 35.00),
+        ("pedicure", "Cortar + Pintar", "Cut + Paint", "Corte e pintura das unhas dos pés.", "Nail cut and polish for feet.", 15, 10.00, 12.50),
 
-        # ── Depilação / Waxing ────────────────────────────────────────────
-        Service(name_pt="Meia Perna", name_en="Half Leg",
-                description_pt="Depilação da meia perna com cera.",
-                description_en="Half leg waxing.",
-                duration_minutes=15, price=15.00, category=depilacao),
-        Service(name_pt="Perna Inteira", name_en="Full Leg",
-                description_pt="Depilação da perna inteira com cera.",
-                description_en="Full leg waxing.",
-                duration_minutes=30, price=22.00, category=depilacao),
-        Service(name_pt="Perna + Virilha", name_en="Leg + Bikini",
-                description_pt="Depilação da perna e virilha com cera.",
-                description_en="Leg and bikini waxing.",
-                duration_minutes=30, price=30.00, category=depilacao),
-        Service(name_pt="Virilha", name_en="Bikini",
-                description_pt="Depilação da virilha com cera.",
-                description_en="Bikini waxing.",
-                duration_minutes=15, price=12.00, category=depilacao),
-        Service(name_pt="Virilha Completa", name_en="Full Bikini",
-                description_pt="Depilação completa da virilha com cera.",
-                description_en="Full bikini waxing.",
-                duration_minutes=30, price=17.00, category=depilacao),
-        Service(name_pt="Axilas", name_en="Underarms",
-                description_pt="Depilação das axilas com cera.",
-                description_en="Underarm waxing.",
-                duration_minutes=10, price=8.00, category=depilacao),
-        Service(name_pt="Buço e Queixo", name_en="Upper Lip & Chin",
-                description_pt="Depilação do buço e queixo com cera.",
-                description_en="Upper lip and chin waxing.",
-                duration_minutes=5, price=5.00, category=depilacao),
-        Service(name_pt="Braços", name_en="Arms",
-                description_pt="Depilação dos braços com cera.",
-                description_en="Arm waxing.",
-                duration_minutes=15, price=15.00, category=depilacao),
-        Service(name_pt="Costas e Peito", name_en="Back & Chest",
-                description_pt="Depilação das costas e peito com cera.",
-                description_en="Back and chest waxing.",
-                duration_minutes=45, price=25.00, category=depilacao),
+        ("manicure", "Manicure Normal", "Regular Manicure", "Manicure clássica com cuidado das mãos.", "Classic manicure with hand care.", 30, 15.00, 15.00),
+        ("manicure", "SPA das Mãos", "Hand SPA", "Tratamento SPA hidratante para as mãos.", "Moisturising SPA treatment for hands.", 30, 25.00, 25.00),
+        ("manicure", "Verniz de Gel", "Gel Polish", "Verniz gel de longa duração.", "Long-lasting gel polish.", 60, 18.00, 25.00),
+        ("manicure", "Extensões", "Extensions", "Extensões de unhas em gel.", "Gel nail extensions.", 90, 35.00, 45.00),
+        ("manicure", "Manutenção", "Maintenance", "Manutenção e retoque das unhas em gel.", "Maintenance and touch-up of gel nails.", 60, 28.00, 30.00),
+        ("manicure", "Manicure Francesa", "French Manicure", "Manicure francesa com acabamento clássico.", "French manicure with a classic finish.", 120, 30.00, 35.00),
+        ("manicure", "Remover Gel", "Gel Removal", "Remoção segura do gel.", "Safe gel removal.", 30, 10.00, 12.50),
 
-        # ── Sobrancelhas / Eyebrows ───────────────────────────────────────
-        Service(name_pt="Design Sobrancelha + Tintura", name_en="Eyebrow Design + Tint",
-                description_pt="Design personalizado com tintura para sobrancelhas perfeitas.",
-                description_en="Personalised design with tint for perfect eyebrows.",
-                duration_minutes=20, price=15.00, category=sobrancelhas),
-        Service(name_pt="Design de Sobrancelha SPA", name_en="SPA Eyebrow Design",
-                description_pt="Design de sobrancelha com tratamento SPA completo.",
-                description_en="Eyebrow design with full SPA treatment.",
-                duration_minutes=30, price=20.00, category=sobrancelhas),
+        ("depilacao", "Meia Perna", "Half Leg", "Depilação da meia perna com cera.", "Half leg waxing.", 15, 10.00, 15.00),
+        ("depilacao", "Perna Inteira", "Full Leg", "Depilação da perna inteira com cera.", "Full leg waxing.", 30, 17.00, 22.00),
+        ("depilacao", "Perna + Virilha", "Leg + Bikini", "Depilação da perna e virilha com cera.", "Leg and bikini waxing.", 30, 25.00, 30.00),
+        ("depilacao", "Virilha", "Bikini", "Depilação da virilha com cera.", "Bikini waxing.", 15, 10.00, 12.00),
+        ("depilacao", "Virilha Completa", "Full Bikini", "Depilação completa da virilha com cera.", "Full bikini waxing.", 30, 13.00, 17.00),
+        ("depilacao", "Axilas", "Underarms", "Depilação das axilas com cera.", "Underarm waxing.", 10, 5.00, 8.00),
+        ("depilacao", "Buço e Queixo", "Upper Lip & Chin", "Depilação do buço e queixo.", "Upper lip and chin waxing.", 5, 2.50, 5.00),
+        ("depilacao", "Braços", "Arms", "Depilação dos braços com cera.", "Arm waxing.", 15, 10.00, 15.00),
+        ("depilacao", "Costas e Peito", "Back & Chest", "Depilação das costas e peito.", "Back and chest waxing.", 45, 20.00, 25.00),
 
-        # ── Pestanas / Eyelashes ──────────────────────────────────────────
-        Service(name_pt="Volume Brasileiro", name_en="Brazilian Volume",
-                description_pt="Extensão de pestanas em volume brasileiro.",
-                description_en="Brazilian volume lash extensions.",
-                duration_minutes=120, price=40.00, category=pestanas),
-        Service(name_pt="Volume Egípcio", name_en="Egyptian Volume",
-                description_pt="Extensão de pestanas em volume egípcio.",
-                description_en="Egyptian volume lash extensions.",
-                duration_minutes=120, price=35.00, category=pestanas),
-        Service(name_pt="Lifting de Pestana", name_en="Lash Lift",
-                description_pt="Lifting natural para pestanas com efeito duradouro.",
-                description_en="Natural lash lift with a long-lasting effect.",
-                duration_minutes=120, price=35.00, category=pestanas),
+        ("sobrancelhas", "Cera ou Threading + Tintura", "Waxing or Threading + Tint", "Design com cera ou linha e tintura.", "Waxing or threading design with tint.", 20, 15.00, 15.00),
+        ("sobrancelhas", "Design de Sobrancelha SPA", "SPA Eyebrow Design", "Design de sobrancelha com tratamento SPA.", "Eyebrow design with SPA treatment.", 30, 20.00, 20.00),
 
-        # ── Faciais / Facials ─────────────────────────────────────────────
-        Service(name_pt="Limpeza de Pele", name_en="Facial Cleansing",
-                description_pt="Limpeza facial para uma pele fresca e renovada.",
-                description_en="Facial cleansing for fresh and renewed skin.",
-                duration_minutes=30, price=25.00, category=faciais),
-        Service(name_pt="Limpeza de Pele Profunda", name_en="Deep Facial Cleansing",
-                description_pt="Limpeza profunda com extração e tratamento especializado.",
-                description_en="Deep cleansing with extraction and specialist treatment.",
-                duration_minutes=60, price=45.00, category=faciais),
-        Service(name_pt="Hydragloss + Cor", name_en="Hydragloss + Color",
-                description_pt="Tratamento hidratante para os lábios com efeito gloss e aplicação de cor, proporcionando hidratação profunda, brilho intenso e um aspeto saudável e natural.",
-                description_en="Hydrating lip treatment with gloss effect and color application, providing deep hydration, intense shine, and a healthy, natural-looking finish.",
-                duration_minutes=30, price=40.00, category=faciais),
+        ("pestanas", "Extensões de Pestanas", "Eyelash Extensions", "Extensões de pestanas.", "Eyelash extensions.", 120, 35.00, 35.00),
+        ("pestanas", "Volume Brasileiro", "Brazilian Volume", "Extensão de pestanas em volume brasileiro.", "Brazilian volume lash extensions.", 120, 40.00, 40.00),
+        ("pestanas", "Lifting de Pestanas", "Lash Lift", "Lifting natural para pestanas.", "Natural lash lift.", 120, 35.00, 35.00),
+
+        ("faciais", "Limpeza de Pele Desintoxicação", "Detox Facial Cleansing", "Limpeza facial desintoxicante.", "Detox facial cleansing.", 30, 35.00, 25.00),
+        ("faciais", "Limpeza de Pele Premium com Tratamento Personalizado", "Premium Facial Cleansing with Personalised Treatment", "Limpeza facial premium com tratamento personalizado.", "Premium facial cleansing with personalised treatment.", 60, 60.00, 45.00),
+        ("faciais", "Hydragloss + Cor", "Hydragloss + Color", "Tratamento hidratante para os lábios com cor.", "Hydrating lip treatment with color.", 30, 35.00, 40.00),
+
+        ("massagem", "Massagem de Relaxamento 35 min", "Relaxing Massage 35 min", "Massagem de relaxamento.", "Relaxing massage.", 35, 35.00, 35.00),
+        ("massagem", "Massagem de Relaxamento 60 min", "Relaxing Massage 60 min", "Massagem de relaxamento.", "Relaxing massage.", 60, 60.00, 60.00),
     ]
+
+    services = []
+
+    for categoria, nome_pt, nome_en, desc_pt, desc_en, duracao, preco_lagos, preco_luz in servicos_base:
+        services.append(Service(
+            name_pt=nome_pt,
+            name_en=nome_en,
+            description_pt=desc_pt,
+            description_en=desc_en,
+            duration_minutes=duracao,
+            price=preco_lagos,
+            category=cat_lagos[categoria]
+        ))
+
+        services.append(Service(
+            name_pt=nome_pt,
+            name_en=nome_en,
+            description_pt=desc_pt,
+            description_en=desc_en,
+            duration_minutes=duracao,
+            price=preco_luz,
+            category=cat_luz[categoria]
+        ))
+
     db.session.add_all(services)
     db.session.commit()

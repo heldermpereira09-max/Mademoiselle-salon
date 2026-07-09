@@ -7,39 +7,64 @@
     <div class="success-card">
       <div class="success-icon">✦</div>
       <h1>{{ _("Your appointment has been booked successfully!") }}</h1>
+
       <p class="success-subtitle">
-        {{ _("We've sent you a confirmation email with all the details of your appointment.") }}
+        {% if lang == 'pt' %}
+          A sua marcação foi registada com sucesso em <strong>{{ booking.salon.name }}</strong>.
+        {% else %}
+          Your appointment has been successfully booked at <strong>{{ booking.salon.name }}</strong>.
+        {% endif %}
       </p>
 
       <div class="booking-summary">
         <div class="summary-row">
+          <span class="summary-label">{% if lang == 'pt' %}Localização{% else %}Location{% endif %}</span>
+          <span class="summary-value">{{ booking.salon.name }}</span>
+        </div>
+
+        <div class="summary-row">
           <span class="summary-label">{{ _("Service") }}</span>
           <span class="summary-value">{{ booking.service.name(lang) }}</span>
         </div>
+
         <div class="summary-row">
           <span class="summary-label">{{ _("Date") }}</span>
           <span class="summary-value">{{ booking.appointment_date.strftime('%d/%m/%Y') }}</span>
         </div>
+
         <div class="summary-row">
           <span class="summary-label">{{ _("Time") }}</span>
           <span class="summary-value">{{ booking.appointment_time.strftime('%H:%M') }}</span>
         </div>
+
         <div class="summary-row">
           <span class="summary-label">{{ _("Duration") }}</span>
           <span class="summary-value">{{ _("%(minutes)s min", minutes=booking.service.duration_minutes) }}</span>
         </div>
+
         <div class="summary-row">
           <span class="summary-label">{{ _("Price") }}</span>
           <span class="summary-value">{{ "%.2f"|format(booking.service.price) }}€</span>
         </div>
+
         <div class="summary-row">
           <span class="summary-label">{{ _("Client") }}</span>
           <span class="summary-value">{{ booking.client_name }}</span>
         </div>
+
+        {% if booking.client_email %}
         <div class="summary-row">
           <span class="summary-label">{{ _("Email") }}</span>
           <span class="summary-value">{{ booking.client_email }}</span>
         </div>
+        {% endif %}
+
+        {% if booking.client_phone %}
+        <div class="summary-row">
+          <span class="summary-label">{% if lang == 'pt' %}Telefone{% else %}Phone{% endif %}</span>
+          <span class="summary-value">{{ booking.client_phone }}</span>
+        </div>
+        {% endif %}
       </div>
 
       <div class="success-actions">
