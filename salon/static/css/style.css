@@ -625,241 +625,533 @@ img { max-width: 100%; display: block; }
    PÁGINA DE ENTRADA — IDIOMA E SALÃO
    ========================================================= */
 
-.welcome-page{
-
-    min-height:100vh;
+.welcome-page {
+    min-height: 100vh;
 
     background:
-        radial-gradient(circle at top left,
-        rgba(255,235,245,.75),
-        transparent 40%),
+        linear-gradient(
+            rgba(255, 249, 247, 0.28),
+            rgba(255, 249, 247, 0.28)
+        ),
+        url("../images/background.png");
 
-        radial-gradient(circle at bottom right,
-        rgba(255,245,225,.75),
-        transparent 35%),
-
-        url("../images/welcome-bg.png");
-
-    background-size:cover;
-    background-position:center;
-    background-attachment:fixed;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
 }
 
 .welcome-overlay {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 32px 18px;
+    min-height: 100vh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 45px 20px;
 }
 
-.welcome-card{
+.welcome-card {
+    width: 100%;
+    max-width: 900px;
 
-    background:rgba(255,255,255,.92);
+    padding: 55px 70px 48px;
 
-    backdrop-filter:blur(12px);
+    text-align: center;
 
-    border-radius:35px;
+    background: rgba(255, 255, 255, 0.94);
+
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    border: 1px solid rgba(201, 169, 110, 0.35);
+    border-radius: 34px;
 
     box-shadow:
+        0 25px 80px rgba(82, 54, 67, 0.16),
+        0 0 70px rgba(201, 169, 110, 0.12);
 
-        0 20px 70px rgba(0,0,0,.12),
+    animation: welcomeFade 0.55s ease;
+}
 
-        0 0 80px rgba(201,169,110,.15);
+@keyframes welcomeFade {
 
-    border:1px solid rgba(201,169,110,.25);
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 
 }
 
-.welcome-logo{
-    width:240px;
-    max-width:85%;
-    height:auto;
-    display:block;
-    margin:0 auto 30px;
+/* Logótipo */
+
+.welcome-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 18px;
 }
 
-.welcome-card h1{
+.welcome-logo {
+    width: 430px;
+    max-width: 92%;
+    height: auto;
 
-    font-size:50px;
+    display: block;
 
-    letter-spacing:.5px;
-
-    margin-top:10px;
-
-    margin-bottom:5px;
-
+    margin: 0 auto;
 }
 
-.welcome-subtitle {
-  margin: 8px 0 34px;
-  font-family: "Playfair Display", serif;
-  font-size: 15px;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  opacity: 0.68;
+/* Descrição */
+
+.welcome-description {
+    max-width: 570px;
+
+    margin: 18px auto 42px;
+
+    text-align: center;
+
+    color: #8a6f78;
+
+    font-size: 1rem;
+    line-height: 1.65;
 }
 
-.welcome-card h2 {
-  margin: 28px 0 16px;
-  font-family: "Playfair Display", serif;
-  font-size: 22px;
-  font-weight: 600;
+/* Mensagens de erro */
+
+.welcome-card .alert {
+    max-width: 620px;
+
+    margin: 0 auto 20px;
+
+    text-align: center;
 }
+
+/* Títulos das secções */
+
+.welcome-section-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 12px;
+
+    margin: 34px 0 22px;
+
+    font-family: "Playfair Display", serif;
+    font-size: 25px;
+    font-weight: 600;
+
+    color: #49323e;
+
+    text-align: center;
+}
+
+.welcome-section-title::before,
+.welcome-section-title::after {
+    content: "";
+
+    flex: 1;
+
+    max-width: 120px;
+    height: 1px;
+
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(201, 169, 110, 0.9)
+    );
+}
+
+.welcome-section-title::after {
+    background: linear-gradient(
+        90deg,
+        rgba(201, 169, 110, 0.9),
+        transparent
+    );
+}
+
+.welcome-title-icon {
+    flex-shrink: 0;
+
+    font-family: "Inter", sans-serif;
+    font-size: 23px;
+    line-height: 1;
+}
+
+/* Idiomas */
 
 .welcome-language {
-  display: flex;
-  justify-content: center;
-  gap: 14px;
-  flex-wrap: wrap;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+
+    gap: 18px;
+
+    flex-wrap: wrap;
 }
 
 .welcome-language label {
-  min-width: 150px;
-  padding: 13px 20px;
-  border: 1px solid rgba(183, 145, 72, 0.42);
-  border-radius: 12px;
-  background: #fff;
-  cursor: pointer;
-  transition: 0.2s ease;
+    min-width: 210px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+
+    padding: 16px 26px;
+
+    border: 1px solid rgba(201, 169, 110, 0.55);
+    border-radius: 14px;
+
+    background: rgba(255, 255, 255, 0.9);
+
+    color: #49323e;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease,
+        background 0.25s ease;
 }
 
 .welcome-language label:hover {
-  border-color: #b79148;
-  transform: translateY(-1px);
+    transform: translateY(-2px);
+
+    border-color: #c9a96e;
+
+    box-shadow:
+        0 9px 25px rgba(201, 169, 110, 0.15);
+}
+
+.welcome-language label:has(input:checked) {
+    border-color: #b79148;
+
+    background: #fffaf2;
+
+    box-shadow:
+        0 10px 28px rgba(201, 169, 110, 0.18);
 }
 
 .welcome-language input {
-  margin-right: 8px;
-  accent-color: #b79148;
+    margin-right: 5px;
+
+    accent-color: #b79148;
 }
 
+.language-code {
+    margin-right: 2px;
+
+    font-size: 0.72rem;
+    font-weight: 600;
+
+    color: #6e5b64;
+}
+
+/* Cartões dos salões */
+
 .welcome-salons {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 28px;
+
+    margin-top: 12px;
 }
 
 .welcome-salon {
     position: relative;
-    cursor: pointer;
 
     display: block;
 
-    border: 2px solid #ecdde4;
-    border-radius: 18px;
+    cursor: pointer;
 
-    background: #fff;
+    border:
+        1.5px solid rgba(192, 123, 150, 0.34);
 
-    transition: all .30s ease;
+    border-radius: 20px;
 
-    box-shadow: 0 6px 18px rgba(0,0,0,.05);
+    background:
+        rgba(255, 255, 255, 0.92);
 
     overflow: hidden;
+
+    transition:
+        transform 0.28s ease,
+        border-color 0.28s ease,
+        box-shadow 0.28s ease,
+        background 0.28s ease;
 }
 
 .welcome-salon input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
+    position: absolute;
+
+    opacity: 0;
+
+    pointer-events: none;
 }
 
 .welcome-salon:hover {
-
-    transform: translateY(-4px);
+    transform: translateY(-5px);
 
     border-color: #c9a96e;
 
-    box-shadow: 0 14px 35px rgba(0,0,0,.10);
-
+    box-shadow:
+        0 15px 35px rgba(82, 54, 67, 0.12);
 }
 
 .welcome-salon:has(input:checked) {
+    transform: translateY(-5px);
+
     border-color: #c9a96e;
+
     background: #fffaf2;
-    box-shadow: 0 18px 45px rgba(201,169,110,.20);
-    transform: translateY(-3px);
+
+    box-shadow:
+        0 17px 42px rgba(201, 169, 110, 0.20),
+        inset 0 0 0 1px rgba(201, 169, 110, 0.15);
 }
 
-.welcome-salon:has(input:checked) div {
-    background: #fffaf2;
-}
+.welcome-salon-content {
+    min-height: 190px;
 
-.welcome-salon div {
-    min-height: 118px;
     display: flex;
     flex-direction: column;
+    align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 20px;
 
-    border: none;
-    border-radius: 0;
+    gap: 10px;
+
+    padding: 28px 25px;
+
+    text-align: center;
+
     background: transparent;
-
-    transition: 0.25s ease;
 }
 
-.welcome-salon div:hover {
-  border-color: #b79148;
-  transform: translateY(-2px);
+.welcome-salon-icon {
+    color: #c9a96e;
+
+    font-family: "Playfair Display", serif;
+    font-size: 30px;
+    line-height: 1;
 }
 
 .welcome-salon strong {
-  font-family: "Playfair Display", serif;
-  font-size: 20px;
+    font-family: "Playfair Display", serif;
+
+    font-size: 25px;
+    font-weight: 600;
+
+    color: #49323e;
 }
 
 .welcome-salon small {
-  line-height: 1.45;
-  opacity: 0.7;
+    max-width: 290px;
+
+    color: #8a767e;
+
+    font-size: 14px;
+    line-height: 1.55;
 }
+
+/* Botão */
 
 .welcome-button {
-  width: 100%;
-  margin-top: 35px;
-  padding: 18px 22px;
-  font-size: 19px;
-  font-weight: 600;
-}
+    position: relative;
 
-@media (max-width: 650px) {
-  .welcome-overlay {
-    align-items: flex-start;
-    padding-top: 22px;
-  }
-
-  .welcome-card {
-    padding: 30px 20px;
-    border-radius: 18px;
-  }
-
-  .welcome-card h1 {
-    font-size: 34px;
-  }
-
-  .welcome-logo {
-    width: 145px;
-  }
-
-  .welcome-salons {
-    grid-template-columns: 1fr;
-  }
-
-  .welcome-language {
-    flex-direction: column;
-  }
-
-  .welcome-language label {
     width: 100%;
-    box-sizing: border-box;
-  }
+
+    margin-top: 38px;
+    padding: 18px 58px;
+
+    border-radius: 999px;
+
+    font-size: 18px;
+    font-weight: 600;
+
+    box-shadow:
+        0 10px 28px rgba(192, 123, 150, 0.26);
 }
-.welcome-description{
-    margin:18px auto 35px;
-    max-width:500px;
-    text-align:center;
-    color:#8a6f78;
-    font-size:1rem;
-    line-height:1.6;
+
+.welcome-button:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 15px 36px rgba(192, 123, 150, 0.34);
+}
+
+.welcome-button-arrow {
+    position: absolute;
+
+    right: 28px;
+
+    font-size: 22px;
+    font-weight: 400;
+
+    transition: transform 0.25s ease;
+}
+
+.welcome-button:hover .welcome-button-arrow {
+    transform: translateX(4px);
+}
+
+/* =========================================================
+   RESPONSIVO — TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .welcome-card {
+        max-width: 760px;
+
+        padding: 48px 45px 42px;
+    }
+
+    .welcome-logo {
+        width: 390px;
+    }
+
+    .welcome-section-title::before,
+    .welcome-section-title::after {
+        max-width: 80px;
+    }
+
+}
+
+/* =========================================================
+   RESPONSIVO — TELEMÓVEL
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .welcome-page {
+        background-attachment: scroll;
+    }
+
+    .welcome-overlay {
+        align-items: flex-start;
+
+        padding: 20px 12px;
+    }
+
+    .welcome-card {
+        padding: 35px 20px 30px;
+
+        border-radius: 24px;
+    }
+
+    .welcome-logo {
+        width: 330px;
+        max-width: 96%;
+    }
+
+    .welcome-description {
+        margin-top: 14px;
+        margin-bottom: 32px;
+
+        font-size: 0.92rem;
+    }
+
+    .welcome-section-title {
+        gap: 8px;
+
+        margin-top: 30px;
+
+        font-size: 21px;
+    }
+
+    .welcome-section-title::before,
+    .welcome-section-title::after {
+        max-width: 35px;
+    }
+
+    .welcome-title-icon {
+        font-size: 20px;
+    }
+
+    .welcome-language {
+        flex-direction: column;
+
+        gap: 12px;
+    }
+
+    .welcome-language label {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .welcome-salons {
+        grid-template-columns: 1fr;
+
+        gap: 16px;
+    }
+
+    .welcome-salon-content {
+        min-height: 145px;
+
+        padding: 24px 18px;
+    }
+
+    .welcome-salon strong {
+        font-size: 22px;
+    }
+
+    .welcome-salon small {
+        font-size: 13px;
+    }
+
+    .welcome-button {
+        margin-top: 28px;
+
+        padding: 16px 50px;
+
+        font-size: 17px;
+    }
+
+    .welcome-button-arrow {
+        right: 22px;
+    }
+
+}
+
+/* =========================================================
+   RESPONSIVO — TELEMÓVEIS PEQUENOS
+   ========================================================= */
+
+@media (max-width: 420px) {
+
+    .welcome-card {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .welcome-logo {
+        width: 285px;
+    }
+
+    .welcome-section-title {
+        font-size: 19px;
+    }
+
+    .welcome-section-title::before,
+    .welcome-section-title::after {
+        max-width: 18px;
+    }
+
+    .welcome-salon-content {
+        min-height: 135px;
+    }
+
 }

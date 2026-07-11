@@ -2,18 +2,31 @@
 <html lang="{{ lang }}">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Mademoiselle Estética & Beleza</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Inter:wght@300;400;500;600&display=swap"
-          rel="stylesheet">
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
 </head>
 
 <body class="welcome-page">
@@ -22,21 +35,20 @@
 
     <div class="welcome-card">
 
-        <img src="{{ url_for('static', filename='images/logo.png') }}"
-             class="welcome-logo"
-             alt="Logo">
+        <div class="welcome-brand">
 
-        <h1>Mademoiselle</h1>
+            <img
+                src="{{ url_for('static', filename='images/logo.png') }}"
+                class="welcome-logo"
+                alt="Mademoiselle Estética & Beleza"
+            >
 
-        <p class="welcome-subtitle" id="welcomeSubtitle">
-            {% if lang == "en" %}
-                Aesthetics & Beauty
-            {% else %}
-                Estética & Beleza
-            {% endif %}
-        </p>
+        </div>
 
-        <p class="welcome-description" id="welcomeDescription">
+        <p
+            class="welcome-description"
+            id="welcomeDescription"
+        >
             {% if lang == "en" %}
                 Choose your language and location to begin your booking.
             {% else %}
@@ -45,19 +57,29 @@
         </p>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            {% for category, message in messages %}
-              <div class="alert alert-{{ category }}">
-                {{ message }}
-              </div>
-            {% endfor %}
-          {% endif %}
+
+            {% if messages %}
+
+                {% for category, message in messages %}
+
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            {% endif %}
+
         {% endwith %}
 
         <form method="POST">
 
-            <h2>
-                🌍 Idioma / Language
+            <h2 class="welcome-section-title">
+
+                <span class="welcome-title-icon">🌍</span>
+
+                <span>Idioma / Language</span>
+
             </h2>
 
             <div class="welcome-language">
@@ -68,9 +90,12 @@
                         type="radio"
                         name="lang"
                         value="pt"
-                        {% if lang == "pt" %}checked{% endif %}>
+                        {% if lang == "pt" %}checked{% endif %}
+                    >
 
-                    🇵🇹 Português
+                    <span class="language-code">PT</span>
+
+                    Português
 
                 </label>
 
@@ -80,60 +105,92 @@
                         type="radio"
                         name="lang"
                         value="en"
-                        {% if lang == "en" %}checked{% endif %}>
+                        {% if lang == "en" %}checked{% endif %}
+                    >
 
-                    🇬🇧 English
+                    <span class="language-code">GB</span>
+
+                    English
 
                 </label>
 
             </div>
 
-            <h2 id="salonTitle">
-              {% if lang == "en" %}
-                📍 Choose your location
-              {% else %}
-                📍 Escolha o salão
-              {% endif %}
+            <h2
+                class="welcome-section-title"
+                id="salonTitle"
+            >
+
+                {% if lang == "en" %}
+
+                    <span class="welcome-title-icon">📍</span>
+
+                    <span>Choose your location</span>
+
+                {% else %}
+
+                    <span class="welcome-title-icon">📍</span>
+
+                    <span>Escolha o salão</span>
+
+                {% endif %}
+
             </h2>
 
             <div class="welcome-salons">
 
                 {% for salon in salons %}
 
-                <label class="welcome-salon">
+                    <label class="welcome-salon">
 
-                    <input
-                        type="radio"
-                        name="salon_slug"
-                        value="{{ salon.slug }}"
-                        required>
+                        <input
+                            type="radio"
+                            name="salon_slug"
+                            value="{{ salon.slug }}"
+                            required
+                        >
 
-                    <div>
+                        <div class="welcome-salon-content">
 
-                        <strong>{{ salon.name }}</strong>
+                            <span class="welcome-salon-icon">
+                                ◇
+                            </span>
 
-                        <small>
+                            <strong>
+                                {{ salon.name }}
+                            </strong>
 
-                            {{ salon.address }}
+                            <small>
+                                {{ salon.address }}
+                            </small>
 
-                        </small>
+                        </div>
 
-                    </div>
-
-                </label>
+                    </label>
 
                 {% endfor %}
 
             </div>
 
-            <button class="btn btn-primary welcome-button">
-              <span id="welcomeButtonText">
-                {% if lang == "en" %}
-                  Enter website
-                {% else %}
-                  Entrar
-                {% endif %}
-              </span>
+            <button
+                type="submit"
+                class="btn btn-primary welcome-button"
+            >
+
+                <span id="welcomeButtonText">
+
+                    {% if lang == "en" %}
+                        Enter website
+                    {% else %}
+                        Entrar
+                    {% endif %}
+
+                </span>
+
+                <span class="welcome-button-arrow">
+                    →
+                </span>
+
             </button>
 
         </form>
@@ -141,41 +198,41 @@
     </div>
 
 </div>
+
 <script>
-  const salonTitle = document.getElementById("salonTitle");
-  const buttonText = document.getElementById("welcomeButtonText");
-  const subtitle = document.getElementById("welcomeSubtitle");
-  const description = document.getElementById("welcomeDescription");
+    const salonTitle = document.getElementById("salonTitle");
+    const buttonText = document.getElementById("welcomeButtonText");
+    const description = document.getElementById("welcomeDescription");
 
-  const languageInputs = document.querySelectorAll(
-    "input[name='lang']"
-  );
+    const languageInputs = document.querySelectorAll(
+        "input[name='lang']"
+    );
 
-  languageInputs.forEach(input => {
-    input.addEventListener("change", function () {
+    languageInputs.forEach(input => {
 
-      const isEnglish = this.value === "en";
+        input.addEventListener("change", function () {
 
-      salonTitle.textContent = isEnglish
-        ? "📍 Choose your location"
-        : "📍 Escolha o salão";
+            const isEnglish = this.value === "en";
 
-      buttonText.textContent = isEnglish
-        ? "Enter website"
-        : "Entrar";
+            salonTitle.innerHTML = isEnglish
+                ? '<span class="welcome-title-icon">📍</span><span>Choose your location</span>'
+                : '<span class="welcome-title-icon">📍</span><span>Escolha o salão</span>';
 
-      subtitle.textContent = isEnglish
-        ? "Aesthetics & Beauty"
-        : "Estética & Beleza";
+            buttonText.textContent = isEnglish
+                ? "Enter website"
+                : "Entrar";
 
-      description.textContent = isEnglish
-        ? "Choose your language and location to begin your booking."
-        : "Escolha o idioma e o salão para iniciar a sua marcação.";
+            description.textContent = isEnglish
+                ? "Choose your language and location to begin your booking."
+                : "Escolha o idioma e o salão para iniciar a sua marcação.";
 
-      document.documentElement.lang = isEnglish ? "en" : "pt";
+            document.documentElement.lang = isEnglish
+                ? "en"
+                : "pt";
+
+        });
 
     });
-  });
 </script>
 
 </body>
