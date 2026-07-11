@@ -219,7 +219,7 @@ def seed_data():
             "Pedicure completa com cuidado dos pés.",
             "Complete pedicure with foot care.",
             30,
-            20.00,
+            25.00,
         ),
         (
             "pedicure",
@@ -266,7 +266,7 @@ def seed_data():
             "Tratamento SPA hidratante para as mãos.",
             "Moisturising SPA treatment for hands.",
             30,
-            25.00,
+            20.00,
         ),
         (
             "manicure",
@@ -293,7 +293,7 @@ def seed_data():
             "Manutenção e retoque das unhas em gel.",
             "Maintenance and touch-up of gel nails.",
             60,
-            28.00,
+            25.00,
         ),
         (
             "manicure",
@@ -358,7 +358,7 @@ def seed_data():
             "Depilação completa da virilha com cera.",
             "Full bikini waxing.",
             30,
-            13.00,
+            15.00,
         ),
         (
             "depilacao",
@@ -371,12 +371,21 @@ def seed_data():
         ),
         (
             "depilacao",
-            "Buço e Queixo",
-            "Upper Lip & Chin",
-            "Depilação do buço e queixo com cera.",
-            "Upper lip and chin waxing.",
+            "Buço ou Queixo",
+            "Upper Lip or Chin",
+            "Depilação do buço ou queixo com cera.",
+            "Upper lip or chin waxing.",
             5,
-            2.50,
+            3.50,
+        ),
+        (
+            "depilacao",
+            "Sobrancelha",
+            "Eyebrow",
+            "Depilação da sobrancelha com cera.",
+            "Eyebrow waxing.",
+            10,
+            6.00,
         ),
         (
             "depilacao",
@@ -667,6 +676,15 @@ def seed_data():
             "Upper lip and chin waxing.",
             5,
             5.00,
+        ),
+        (
+            "depilacao",
+            "Sobrancelha",
+            "Eyebrow",
+            "Depilação da sobrancelha com cera.",
+            "Eyebrow waxing.",
+            10,
+            6.00,
         ),
         (
             "depilacao",
