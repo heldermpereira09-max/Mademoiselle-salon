@@ -29,6 +29,27 @@
         <li><a href="{{ url_for('main.contact') }}">{% if lang == 'pt' %}Contato{% else %}Contact{% endif %}</a></li>
       </ul>
       <div class="nav-actions">
+        
+        {% if salon %}
+          <a href="{{ url_for('main.choose_location') }}"
+             class="salon-selector"
+             title="{% if lang == 'pt' %}Alterar localização{% else %}Change location{% endif %}">
+            <span class="salon-selector-icon">📍</span>
+
+            <span class="salon-selector-text">
+              <small>
+                {% if lang == 'pt' %}
+                  Salão
+                {% else %}
+                  Location
+                {% endif %}
+              </small>
+
+              <strong>{{ salon.name }}</strong>
+            </span>
+          </a>
+        {% endif %}
+
         <div class="lang-switcher">
           <a href="{{ url_for('main.set_lang', lang='pt') }}" class="lang-btn {% if lang == 'pt' %}active{% endif %}">PT</a>
           <span>|</span>
@@ -41,6 +62,21 @@
       </div>
     </div>
     <div class="mobile-menu" id="mobileMenu">
+
+      {% if salon %}
+        <a href="{{ url_for('main.choose_location') }}"
+           class="mobile-salon-selector">
+          📍 {{ salon.name }}
+          <span>
+            {% if lang == 'pt' %}
+              — Alterar localização
+            {% else %}
+              — Change location
+            {% endif %}
+          </span>
+        </a>
+      {% endif %}
+      
       <a href="{{ url_for('main.index') }}">{% if lang == 'pt' %}Início{% else %}Home{% endif %}</a>
       <a href="{{ url_for('main.services') }}">{% if lang == 'pt' %}Serviços{% else %}Services{% endif %}</a>
       <a href="{{ url_for('main.book') }}">{% if lang == 'pt' %}Agendar{% else %}Book{% endif %}</a>
@@ -94,15 +130,25 @@
           <ul class="footer-info-list">
             <li>
               <span class="footer-info-icon">📍</span>
-              <a href="https://maps.google.com/?q=Urb.+St.+James+Lt+4+Fração+U,+Montes+da+Luz,+8600-174+Luz" target="_blank" rel="noopener">Urb. St. James Lt 4 Fração U<br/>Montes da Luz, 8600-174 Luz</a>
+              <a href="https://maps.google.com/?q={{ salon.address|urlencode }}"
+                 target="_blank"
+                 rel="noopener">
+                {{ (salon.address if salon else "")|replace(", ", ",<br>")|safe }}
+              </a>
             </li>
             <li>
               <span class="footer-info-icon">💬</span>
-              <a href="https://wa.me/351910668153" target="_blank" rel="noopener">+351 910 668 153</a>
+              <a href="https://wa.me/{{ salon.phone|replace('+','')|replace(' ','') }}"
+                 target="_blank"
+                 rel="noopener">
+                {{ salon.phone if salon else "" }}
+              </a>
             </li>
             <li>
               <span class="footer-info-icon">📧</span>
-              <a href="mailto:dany_alves.7@hotmail.com">dany_alves.7@hotmail.com</a>
+              <a href="mailto:{{ salon.email if salon else '' }}">
+                  {{ salon.email if salon else "" }}
+              </a>
             </li>
           </ul>
         </div>
@@ -113,7 +159,7 @@
           <ul class="footer-info-list">
             <li>
               <span class="footer-info-icon">🕐</span>
-              <span>{% if lang == 'pt' %}Seg–Sex: 10h – 18h{% else %}Mon–Fri: 10am – 6pm{% endif %}</span>
+              <span>{% if lang == 'pt' %}{{ salon.opening_hours_pt if salon else "" }}{% else %}{{ salon.opening_hours_en if salon else "" }}{% endif %}</span>
             </li>
             <li>
               <span class="footer-info-icon">–</span>

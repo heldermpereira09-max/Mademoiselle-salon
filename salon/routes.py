@@ -15,13 +15,12 @@ def get_lang():
 
 
 def get_selected_salon():
-    slug = session.get("salon_slug", "lagos")
-    salon = Salon.query.filter_by(slug=slug).first()
+    slug = session.get("salon_slug")
 
-    if not salon:
-        salon = Salon.query.first()
+    if not slug:
+        return None
 
-    return salon
+    return Salon.query.filter_by(slug=slug).first()
 
 
 @main.route("/set-lang/<lang>")
@@ -30,17 +29,36 @@ def set_lang(lang):
         session["lang"] = lang
     return redirect(request.referrer or url_for("main.index"))
 
+@main.route("/choose-location")
+def choose_location():
+    salons = Salon.query.order_by(Salon.name).all()
+
+    return render_template(
+        "choose_location.html",
+        salons=salons,
+        lang=get_lang(),
+    )
 
 @main.route("/set-salon/<slug>")
 def set_salon(slug):
     salon = Salon.query.filter_by(slug=slug).first_or_404()
     session["salon_slug"] = salon.slug
+
+    next_page = request.args.get("next")
+
+    if next_page and next_page.startswith("/"):
+        return redirect(next_page)
+
     return redirect(url_for("main.index"))
 
 
 @main.route("/")
 def index():
     salon = get_selected_salon()
+
+    if not salon:
+        return redirect(url_for("main.choose_location"))
+
     salons = Salon.query.order_by(Salon.name).all()
 
     categories = (
@@ -62,6 +80,15 @@ def index():
 @main.route("/services")
 def services():
     salon = get_selected_salon()
+
+    if not salon:
+        return redirect(
+            url_for(
+                "main.choose_location",
+                next=request.path
+            )
+        )
+
     salons = Salon.query.order_by(Salon.name).all()
 
     categories = (
@@ -83,6 +110,14 @@ def services():
 def book():
 
     salon = get_selected_salon()
+
+    if not salon:
+        return redirect(
+            url_for(
+                "main.choose_location",
+                next=request.path
+            )
+        )
 
     categories = (
         ServiceCategory.query
@@ -279,14 +314,33 @@ def book():
 
 @main.route("/booking-success/<int:booking_id>")
 def booking_success(booking_id):
-    booking = Booking.query.get_or_404(booking_id)
-    return render_template("booking_success.html", booking=booking, lang=get_lang())
+
+    salon = get_selected_salon()
+
+    if not salon:
+        return redirect(url_for("main.choose_location"))
+
+    booking = Booking.query.filter_by(
+        id=booking_id,
+        salon_id=salon.id
+    ).first_or_404()
+
+    return render_template(
+        "booking_success.html",
+        booking=booking,
+        salon=salon,
+        lang=get_lang()
+    )
 
 
 @main.route("/api/services")
 def api_services():
 
     salon = get_selected_salon()
+
+    if not salon:
+        return jsonify([])
+    
     lang = get_lang()
 
     categories = (
@@ -335,8 +389,15 @@ def api_services():
 
 @main.route("/api/available-times")
 def api_available_times():
+    salon = get_selected_salon()
+
+    # Obriga o cliente a escolher uma localização
+    if not salon:
+        return jsonify([])
+
     date_str = request.args.get("date")
     service_id = request.args.get("service_id", type=int)
+
     if not date_str or not service_id:
         return jsonify([])
 
@@ -345,29 +406,45 @@ def api_available_times():
     except ValueError:
         return jsonify([])
 
+    # Não permitir datas anteriores
     if appt_date < date.today():
         return jsonify([])
-    
+
     # Fechado ao sábado e domingo
     if appt_date.weekday() in [5, 6]:
         return jsonify([])
 
-    service = Service.query.get(service_id)
+    # Confirma que o serviço pertence à localização escolhida
+    service = (
+        Service.query
+        .join(ServiceCategory)
+        .filter(
+            Service.id == service_id,
+            ServiceCategory.salon_id == salon.id,
+            Service.active.is_(True),
+        )
+        .first()
+    )
+
     if not service:
         return jsonify([])
-    
+
+    # Consultar os eventos do Outlook através do Make
     try:
         response = requests.post(
             AVAILABILITY_WEBHOOK_URL,
-            json={"date": date_str},
-            timeout=10
+            json={
+                "date": date_str,
+                "salon": salon.slug,
+                "salon_name": salon.name,
+            },
+            timeout=10,
         )
 
         if response.status_code == 200:
-
-           outlook_events = response.json()
+            outlook_events = response.json()
         else:
-           outlook_events = []
+            outlook_events = []
 
     except Exception as e:
         print("Erro ao consultar Outlook:", e)
@@ -381,7 +458,7 @@ def api_available_times():
                 start_str = event["start"]["dateTime"]
                 end_str = event["end"]["dateTime"]
 
-                # Remove milissegundos do Outlook
+                # Remover milissegundos enviados pelo Outlook
                 start_str = start_str.split(".")[0]
                 end_str = end_str.split(".")[0]
 
@@ -402,62 +479,68 @@ def api_available_times():
                 outlook_busy.append((start_dt, end_dt))
 
             except Exception as e:
-                print("Erro ao ler evento Outlook:", e)   
+                print("Erro ao ler evento Outlook:", e)
 
-    salon = get_selected_salon()
-
+    # Só consultar marcações da localização escolhida
     existing = Booking.query.filter_by(
-    salon_id=salon.id,
-    appointment_date=appt_date
+        salon_id=salon.id,
+        appointment_date=appt_date,
     ).all()
-    booked_times = set()
-    for b in existing:
-        start = datetime.combine(appt_date, b.appointment_time)
-        end = start + timedelta(minutes=b.service.duration_minutes)
-        t = start
-        while t < end:
-            booked_times.add(t.strftime("%H:%M"))
-            t += timedelta(minutes=15)
 
     slots = []
     start_hour = 9
     end_hour = 19
-    t = datetime.combine(appt_date, datetime.min.time().replace(hour=start_hour))
-    end = datetime.combine(appt_date, datetime.min.time().replace(hour=end_hour))
 
-    while t + timedelta(minutes=service.duration_minutes) <= end:
-        slot_str = t.strftime("%H:%M")
-        slot_start = t
-        slot_end = t + timedelta(minutes=service.duration_minutes)
-        
-        now = datetime.now()
-        booking_limit = now + timedelta(hours=2)
+    current_slot = datetime.combine(
+        appt_date,
+        datetime.min.time().replace(hour=start_hour),
+    )
 
+    closing_time = datetime.combine(
+        appt_date,
+        datetime.min.time().replace(hour=end_hour),
+    )
+
+    service_duration = timedelta(minutes=service.duration_minutes)
+    booking_limit = datetime.now() + timedelta(hours=2)
+
+    while current_slot + service_duration <= closing_time:
+        slot_start = current_slot
+        slot_end = current_slot + service_duration
+
+        # No próprio dia, exige pelo menos duas horas de antecedência
         if appt_date == date.today() and slot_start < booking_limit:
-            t += timedelta(minutes=15)
+            current_slot += timedelta(minutes=15)
             continue
 
         overlaps = False
 
-        for b in existing:
-            existing_start = datetime.combine(appt_date, b.appointment_time)
-            existing_end = existing_start + timedelta(minutes=b.service.duration_minutes)
+        # Verificar marcações guardadas na base de dados
+        for booking in existing:
+            existing_start = datetime.combine(
+                appt_date,
+                booking.appointment_time,
+            )
+
+            existing_end = existing_start + timedelta(
+                minutes=booking.service.duration_minutes
+            )
 
             if slot_start < existing_end and slot_end > existing_start:
                 overlaps = True
                 break
 
-        # Verificar eventos do Outlook
+        # Verificar eventos existentes no calendário Outlook
         if not overlaps:
             for existing_start, existing_end in outlook_busy:
-
                 if slot_start < existing_end and slot_end > existing_start:
                     overlaps = True
                     break
 
         if not overlaps:
-            slots.append(slot_str)
-        t += timedelta(minutes=15)
+            slots.append(slot_start.strftime("%H:%M"))
+
+        current_slot += timedelta(minutes=15)
 
     return jsonify(slots)
 

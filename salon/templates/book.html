@@ -31,7 +31,9 @@
       {% for s in salons %}
 
       <a href="{{ url_for('main.set_salon', slug=s.slug) }}"
-         class="btn {% if salon.id == s.id %}btn-primary{% else %}btn-outline{% endif %}">
+         class="salon-change-link btn {% if salon.id == s.id %}btn-primary{% else %}btn-outline{% endif %}"
+         data-current-salon="{{ salon.slug }}"
+         data-target-salon="{{ s.slug }}">
 
         {{ s.name }}
 
@@ -159,6 +161,8 @@
 
       <div class="booking-preview" id="bookingPreview">
           <h3>{% if lang == 'pt' %}Resumo da Marcação{% else %}Booking Summary{% endif %}</h3>
+
+          <p><strong>{% if lang == 'pt' %}Salão:{% else %}Location:{% endif %}</strong><span>{{ salon.name }}</span></p>
 
           <p><strong>{% if lang == 'pt' %}Serviço:{% else %}Service:{% endif %}</strong> <span id="previewService">-</span></p>
 
@@ -327,6 +331,40 @@ bookingForm.addEventListener("submit", function (e) {
         return;
     }
 });
+
+document.querySelectorAll(".salon-change-link").forEach(link => {
+    link.addEventListener("click", function (e) {
+
+        const currentSalon = this.dataset.currentSalon;
+        const targetSalon = this.dataset.targetSalon;
+
+        if (currentSalon === targetSalon) {
+            e.preventDefault();
+            return;
+        }
+
+        const hasStartedBooking =
+            getSelectedServiceId() ||
+            dateInput.value ||
+            timeSelect.value ||
+            nameInput.value.trim() ||
+            phoneInput.value.trim();
+
+        if (!hasStartedBooking) {
+            return;
+        }
+
+        const message =
+            lang === "pt"
+                ? "Ao mudar de salão, os dados já preenchidos nesta marcação serão perdidos. Pretende continuar?"
+                : "Changing location will discard the details already entered for this booking. Do you want to continue?";
+
+        if (!window.confirm(message)) {
+            e.preventDefault();
+        }
+    });
+});
+
 updateBookingPreview();
 </script>
 {% endblock %}

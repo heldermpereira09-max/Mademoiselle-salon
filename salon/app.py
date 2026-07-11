@@ -108,10 +108,24 @@ db = SQLAlchemy()
 
 def create_app():
     app = Flask(__name__)
-    app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key")
-    db_url = os.environ.get("DATABASE_URL", "")
-    if not db_url or db_url.startswith("postgresql"):
+
+    app.secret_key = os.environ.get(
+        "SESSION_SECRET",
+        "dev-secret-key"
+    )
+
+    db_url = os.environ.get("DATABASE_URL")
+
+    if not db_url:
         db_url = "sqlite:///salon.db"
+
+    if db_url.startswith("postgres://"):
+        db_url = db_url.replace(
+            "postgres://",
+            "postgresql://",
+            1
+        )
+
     app.config["SQLALCHEMY_DATABASE_URI"] = db_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["BABEL_DEFAULT_LOCALE"] = "pt"
@@ -126,17 +140,26 @@ def create_app():
 
     def get_locale():
         lang = session.get("lang")
+
         if lang and lang in ["pt", "en"]:
             return lang
-        return request.accept_languages.best_match(["pt", "en"], default="pt")
 
-    babel.init_app(app, locale_selector=get_locale)
+        return request.accept_languages.best_match(
+            ["pt", "en"],
+            default="pt"
+        )
+
+    babel.init_app(
+        app,
+        locale_selector=get_locale
+    )
 
     from .routes import main
     app.register_blueprint(main)
 
     with app.app_context():
         db.create_all()
+
         from .models import seed_data
         seed_data()
 
