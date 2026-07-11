@@ -36,6 +36,14 @@
             {% endif %}
         </p>
 
+        <p class="welcome-description" id="welcomeDescription">
+            {% if lang == "en" %}
+                Choose your language and location to begin your booking.
+            {% else %}
+                Escolha o idioma e o salão para iniciar a sua marcação.
+            {% endif %}
+        </p>
+
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
             {% for category, message in messages %}
@@ -137,6 +145,7 @@
   const salonTitle = document.getElementById("salonTitle");
   const buttonText = document.getElementById("welcomeButtonText");
   const subtitle = document.getElementById("welcomeSubtitle");
+  const description = document.getElementById("welcomeDescription");
 
   const languageInputs = document.querySelectorAll(
     "input[name='lang']"
@@ -144,6 +153,7 @@
 
   languageInputs.forEach(input => {
     input.addEventListener("change", function () {
+
       const isEnglish = this.value === "en";
 
       salonTitle.textContent = isEnglish
@@ -158,7 +168,12 @@
         ? "Aesthetics & Beauty"
         : "Estética & Beleza";
 
+      description.textContent = isEnglish
+        ? "Choose your language and location to begin your booking."
+        : "Escolha o idioma e o salão para iniciar a sua marcação.";
+
       document.documentElement.lang = isEnglish ? "en" : "pt";
+
     });
   });
 </script>

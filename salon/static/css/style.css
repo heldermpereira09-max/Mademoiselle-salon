@@ -625,16 +625,24 @@ img { max-width: 100%; display: block; }
    PÁGINA DE ENTRADA — IDIOMA E SALÃO
    ========================================================= */
 
-.welcome-page {
-  min-height: 100vh;
-  margin: 0;
-  font-family: "Inter", sans-serif;
-  background:
-    linear-gradient(
-      rgba(250, 244, 240, 0.86),
-      rgba(245, 235, 229, 0.92)
-    ),
-    url("../images/hero-bg.jpg") center / cover fixed;
+.welcome-page{
+
+    min-height:100vh;
+
+    background:
+        radial-gradient(circle at top left,
+        rgba(255,235,245,.75),
+        transparent 40%),
+
+        radial-gradient(circle at bottom right,
+        rgba(255,245,225,.75),
+        transparent 35%),
+
+        url("../images/welcome-bg.png");
+
+    background-size:cover;
+    background-position:center;
+    background-attachment:fixed;
 }
 
 .welcome-overlay {
@@ -645,32 +653,42 @@ img { max-width: 100%; display: block; }
   padding: 32px 18px;
 }
 
-.welcome-card {
-  width: 100%;
-  max-width: 720px;
-  padding: 42px;
-  border: 1px solid rgba(183, 145, 72, 0.28);
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 24px 70px rgba(74, 48, 38, 0.18);
-  text-align: center;
-  backdrop-filter: blur(8px);
+.welcome-card{
+
+    background:rgba(255,255,255,.92);
+
+    backdrop-filter:blur(12px);
+
+    border-radius:35px;
+
+    box-shadow:
+
+        0 20px 70px rgba(0,0,0,.12),
+
+        0 0 80px rgba(201,169,110,.15);
+
+    border:1px solid rgba(201,169,110,.25);
+
 }
 
-.welcome-logo {
-  width: 170px;
-  max-width: 70%;
-  max-height: 125px;
-  object-fit: contain;
-  margin-bottom: 12px;
+.welcome-logo{
+    width:240px;
+    max-width:85%;
+    height:auto;
+    display:block;
+    margin:0 auto 30px;
 }
 
-.welcome-card h1 {
-  margin: 0;
-  font-family: "Playfair Display", serif;
-  font-size: 42px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
+.welcome-card h1{
+
+    font-size:50px;
+
+    letter-spacing:.5px;
+
+    margin-top:10px;
+
+    margin-bottom:5px;
+
 }
 
 .welcome-subtitle {
@@ -723,8 +741,21 @@ img { max-width: 100%; display: block; }
 }
 
 .welcome-salon {
-  position: relative;
-  cursor: pointer;
+    position: relative;
+    cursor: pointer;
+
+    display: block;
+
+    border: 2px solid #ecdde4;
+    border-radius: 18px;
+
+    background: #fff;
+
+    transition: all .30s ease;
+
+    box-shadow: 0 6px 18px rgba(0,0,0,.05);
+
+    overflow: hidden;
 }
 
 .welcome-salon input {
@@ -733,17 +764,40 @@ img { max-width: 100%; display: block; }
   pointer-events: none;
 }
 
+.welcome-salon:hover {
+
+    transform: translateY(-4px);
+
+    border-color: #c9a96e;
+
+    box-shadow: 0 14px 35px rgba(0,0,0,.10);
+
+}
+
+.welcome-salon:has(input:checked) {
+    border-color: #c9a96e;
+    background: #fffaf2;
+    box-shadow: 0 18px 45px rgba(201,169,110,.20);
+    transform: translateY(-3px);
+}
+
+.welcome-salon:has(input:checked) div {
+    background: #fffaf2;
+}
+
 .welcome-salon div {
-  min-height: 118px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 8px;
-  padding: 20px;
-  border: 1px solid rgba(183, 145, 72, 0.42);
-  border-radius: 16px;
-  background: #fff;
-  transition: 0.2s ease;
+    min-height: 118px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+    padding: 20px;
+
+    border: none;
+    border-radius: 0;
+    background: transparent;
+
+    transition: 0.25s ease;
 }
 
 .welcome-salon div:hover {
@@ -761,19 +815,12 @@ img { max-width: 100%; display: block; }
   opacity: 0.7;
 }
 
-.welcome-salon input:checked + div {
-  color: #fff;
-  border-color: #b79148;
-  background: #b79148;
-  box-shadow: 0 10px 24px rgba(183, 145, 72, 0.25);
-  transform: translateY(-2px);
-}
-
 .welcome-button {
   width: 100%;
-  margin-top: 30px;
-  padding: 14px 22px;
-  font-size: 16px;
+  margin-top: 35px;
+  padding: 18px 22px;
+  font-size: 19px;
+  font-weight: 600;
 }
 
 @media (max-width: 650px) {
@@ -807,4 +854,12 @@ img { max-width: 100%; display: block; }
     width: 100%;
     box-sizing: border-box;
   }
+}
+.welcome-description{
+    margin:18px auto 35px;
+    max-width:500px;
+    text-align:center;
+    color:#8a6f78;
+    font-size:1rem;
+    line-height:1.6;
 }
