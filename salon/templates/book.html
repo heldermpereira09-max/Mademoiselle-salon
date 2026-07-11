@@ -30,7 +30,7 @@
 
       {% for s in salons %}
 
-      <a href="{{ url_for('main.set_salon', slug=s.slug) }}"
+      <a href="{{ url_for('main.set_salon', slug=s.slug, next=url_for('main.book')) }}"
          class="salon-change-link btn {% if salon.id == s.id %}btn-primary{% else %}btn-outline{% endif %}"
          data-current-salon="{{ salon.slug }}"
          data-target-salon="{{ s.slug }}">

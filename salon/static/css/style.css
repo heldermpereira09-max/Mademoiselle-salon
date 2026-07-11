@@ -621,3 +621,190 @@ img { max-width: 100%; display: block; }
      font-weight: 700;
      cursor: pointer;
    }
+/* =========================================================
+   PÁGINA DE ENTRADA — IDIOMA E SALÃO
+   ========================================================= */
+
+.welcome-page {
+  min-height: 100vh;
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  background:
+    linear-gradient(
+      rgba(250, 244, 240, 0.86),
+      rgba(245, 235, 229, 0.92)
+    ),
+    url("../images/hero-bg.jpg") center / cover fixed;
+}
+
+.welcome-overlay {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 18px;
+}
+
+.welcome-card {
+  width: 100%;
+  max-width: 720px;
+  padding: 42px;
+  border: 1px solid rgba(183, 145, 72, 0.28);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 24px 70px rgba(74, 48, 38, 0.18);
+  text-align: center;
+  backdrop-filter: blur(8px);
+}
+
+.welcome-logo {
+  width: 170px;
+  max-width: 70%;
+  max-height: 125px;
+  object-fit: contain;
+  margin-bottom: 12px;
+}
+
+.welcome-card h1 {
+  margin: 0;
+  font-family: "Playfair Display", serif;
+  font-size: 42px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.welcome-subtitle {
+  margin: 8px 0 34px;
+  font-family: "Playfair Display", serif;
+  font-size: 15px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  opacity: 0.68;
+}
+
+.welcome-card h2 {
+  margin: 28px 0 16px;
+  font-family: "Playfair Display", serif;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.welcome-language {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.welcome-language label {
+  min-width: 150px;
+  padding: 13px 20px;
+  border: 1px solid rgba(183, 145, 72, 0.42);
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.welcome-language label:hover {
+  border-color: #b79148;
+  transform: translateY(-1px);
+}
+
+.welcome-language input {
+  margin-right: 8px;
+  accent-color: #b79148;
+}
+
+.welcome-salons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.welcome-salon {
+  position: relative;
+  cursor: pointer;
+}
+
+.welcome-salon input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.welcome-salon div {
+  min-height: 118px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px;
+  border: 1px solid rgba(183, 145, 72, 0.42);
+  border-radius: 16px;
+  background: #fff;
+  transition: 0.2s ease;
+}
+
+.welcome-salon div:hover {
+  border-color: #b79148;
+  transform: translateY(-2px);
+}
+
+.welcome-salon strong {
+  font-family: "Playfair Display", serif;
+  font-size: 20px;
+}
+
+.welcome-salon small {
+  line-height: 1.45;
+  opacity: 0.7;
+}
+
+.welcome-salon input:checked + div {
+  color: #fff;
+  border-color: #b79148;
+  background: #b79148;
+  box-shadow: 0 10px 24px rgba(183, 145, 72, 0.25);
+  transform: translateY(-2px);
+}
+
+.welcome-button {
+  width: 100%;
+  margin-top: 30px;
+  padding: 14px 22px;
+  font-size: 16px;
+}
+
+@media (max-width: 650px) {
+  .welcome-overlay {
+    align-items: flex-start;
+    padding-top: 22px;
+  }
+
+  .welcome-card {
+    padding: 30px 20px;
+    border-radius: 18px;
+  }
+
+  .welcome-card h1 {
+    font-size: 34px;
+  }
+
+  .welcome-logo {
+    width: 145px;
+  }
+
+  .welcome-salons {
+    grid-template-columns: 1fr;
+  }
+
+  .welcome-language {
+    flex-direction: column;
+  }
+
+  .welcome-language label {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}

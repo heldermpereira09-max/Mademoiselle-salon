@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Mademoiselle Estética & Beleza</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Inter:wght@300;400;500;600&display=swap"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="welcome-page">
+
+<div class="welcome-overlay">
+
+    <div class="welcome-card">
+
+        <img src="{{ url_for('static', filename='images/logo.png') }}"
+             class="welcome-logo"
+             alt="Logo">
+
+        <h1>Mademoiselle</h1>
+
+        <p class="welcome-subtitle" id="welcomeSubtitle">
+            {% if lang == "en" %}
+                Aesthetics & Beauty
+            {% else %}
+                Estética & Beleza
+            {% endif %}
+        </p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }}">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+
+            <h2>
+                🌍 Idioma / Language
+            </h2>
+
+            <div class="welcome-language">
+
+                <label>
+
+                    <input
+                        type="radio"
+                        name="lang"
+                        value="pt"
+                        {% if lang == "pt" %}checked{% endif %}>
+
+                    🇵🇹 Português
+
+                </label>
+
+                <label>
+
+                    <input
+                        type="radio"
+                        name="lang"
+                        value="en"
+                        {% if lang == "en" %}checked{% endif %}>
+
+                    🇬🇧 English
+
+                </label>
+
+            </div>
+
+            <h2 id="salonTitle">
+              {% if lang == "en" %}
+                📍 Choose your location
+              {% else %}
+                📍 Escolha o salão
+              {% endif %}
+            </h2>
+
+            <div class="welcome-salons">
+
+                {% for salon in salons %}
+
+                <label class="welcome-salon">
+
+                    <input
+                        type="radio"
+                        name="salon_slug"
+                        value="{{ salon.slug }}"
+                        required>
+
+                    <div>
+
+                        <strong>{{ salon.name }}</strong>
+
+                        <small>
+
+                            {{ salon.address }}
+
+                        </small>
+
+                    </div>
+
+                </label>
+
+                {% endfor %}
+
+            </div>
+
+            <button class="btn btn-primary welcome-button">
+              <span id="welcomeButtonText">
+                {% if lang == "en" %}
+                  Enter website
+                {% else %}
+                  Entrar
+                {% endif %}
+              </span>
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+<script>
+  const salonTitle = document.getElementById("salonTitle");
+  const buttonText = document.getElementById("welcomeButtonText");
+  const subtitle = document.getElementById("welcomeSubtitle");
+
+  const languageInputs = document.querySelectorAll(
+    "input[name='lang']"
+  );
+
+  languageInputs.forEach(input => {
+    input.addEventListener("change", function () {
+      const isEnglish = this.value === "en";
+
+      salonTitle.textContent = isEnglish
+        ? "📍 Choose your location"
+        : "📍 Escolha o salão";
+
+      buttonText.textContent = isEnglish
+        ? "Enter website"
+        : "Entrar";
+
+      subtitle.textContent = isEnglish
+        ? "Aesthetics & Beauty"
+        : "Estética & Beleza";
+
+      document.documentElement.lang = isEnglish ? "en" : "pt";
+    });
+  });
+</script>
+
+</body>
+</html>

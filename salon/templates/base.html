@@ -31,7 +31,7 @@
       <div class="nav-actions">
         
         {% if salon %}
-          <a href="{{ url_for('main.choose_location') }}"
+          <a href="{{ url_for('main.welcome') }}"
              class="salon-selector"
              title="{% if lang == 'pt' %}Alterar localização{% else %}Change location{% endif %}">
             <span class="salon-selector-icon">📍</span>
@@ -64,7 +64,7 @@
     <div class="mobile-menu" id="mobileMenu">
 
       {% if salon %}
-        <a href="{{ url_for('main.choose_location') }}"
+        <a href="{{ url_for('main.welcome') }}"
            class="mobile-salon-selector">
           📍 {{ salon.name }}
           <span>

@@ -29,15 +29,6 @@ def set_lang(lang):
         session["lang"] = lang
     return redirect(request.referrer or url_for("main.index"))
 
-@main.route("/choose-location")
-def choose_location():
-    salons = Salon.query.order_by(Salon.name).all()
-
-    return render_template(
-        "choose_location.html",
-        salons=salons,
-        lang=get_lang(),
-    )
 
 @main.route("/set-salon/<slug>")
 def set_salon(slug):
@@ -51,13 +42,56 @@ def set_salon(slug):
 
     return redirect(url_for("main.index"))
 
+@main.route("/welcome", methods=["GET", "POST"])
+def welcome():
+    salons = Salon.query.order_by(Salon.name).all()
+
+    if request.method == "POST":
+        lang = request.form.get("lang")
+        salon_slug = request.form.get("salon_slug")
+
+        if lang not in ["pt", "en"]:
+            flash("Please select a language.", "danger")
+            return render_template(
+                "welcome.html",
+                salons=salons,
+                lang="pt",
+            )
+
+        salon = Salon.query.filter_by(slug=salon_slug).first()
+
+        if not salon:
+            flash(
+                "Selecione uma localização válida."
+                if lang == "pt"
+                else "Please select a valid location.",
+                "danger",
+            )
+
+            return render_template(
+                "welcome.html",
+                salons=salons,
+                lang=lang,
+            )
+
+        session["lang"] = lang
+        session["salon_slug"] = salon.slug
+
+        return redirect(url_for("main.index"))
+
+    return render_template(
+        "welcome.html",
+        salons=salons,
+        lang=session.get("lang", "pt"),
+    )
 
 @main.route("/")
 def index():
     salon = get_selected_salon()
+    lang = session.get("lang")
 
-    if not salon:
-        return redirect(url_for("main.choose_location"))
+    if not salon or lang not in ["pt", "en"]:
+        return redirect(url_for("main.welcome"))
 
     salons = Salon.query.order_by(Salon.name).all()
 
@@ -73,7 +107,7 @@ def index():
         salons=salons,
         salon=salon,
         categories=categories,
-        lang=get_lang(),
+        lang=lang,
     )
 
 
@@ -84,7 +118,7 @@ def services():
     if not salon:
         return redirect(
             url_for(
-                "main.choose_location",
+                "main.welcome",
                 next=request.path
             )
         )
@@ -114,7 +148,7 @@ def book():
     if not salon:
         return redirect(
             url_for(
-                "main.choose_location",
+                "main.welcome",
                 next=request.path
             )
         )
@@ -318,7 +352,7 @@ def booking_success(booking_id):
     salon = get_selected_salon()
 
     if not salon:
-        return redirect(url_for("main.choose_location"))
+        return redirect(url_for("main.welcome"))
 
     booking = Booking.query.filter_by(
         id=booking_id,
