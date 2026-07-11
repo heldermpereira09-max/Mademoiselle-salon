@@ -187,13 +187,15 @@ def book():
         appt_time_str = request.form.get("appointment_time", "").strip()
 
         notes = request.form.get("notes", "").strip()
+        lang = get_lang()
 
         service = (
             Service.query
             .join(ServiceCategory)
             .filter(
                 Service.id == service_id,
-                ServiceCategory.salon_id == salon.id
+                ServiceCategory.salon_id == salon.id,
+                Service.active.is_(True),
             )
             .first()
         )
@@ -207,7 +209,11 @@ def book():
             errors.append("Phone is required.")
 
         if not service:
-            errors.append("Please select a valid service.")
+            errors.append(
+                "Selecione um serviço válido e ativo."
+                if lang == "pt"
+                else "Please select a valid, active service."
+            )
 
         if not appt_date_str:
             errors.append("Please select a date.")
@@ -253,6 +259,199 @@ def book():
                 categories=categories,
                 selected_service=service,
                 lang=get_lang(),
+                form_data=request.form,
+                today=date.today().isoformat(),
+            )
+
+        slot_start = datetime.combine(appt_date, appt_time)
+        slot_end = slot_start + timedelta(minutes=service.duration_minutes)
+        opening_time = datetime.combine(
+            appt_date,
+            datetime.min.time().replace(hour=9),
+        )
+        closing_time = datetime.combine(
+            appt_date,
+            datetime.min.time().replace(hour=19),
+        )
+        now_lisbon = datetime.now(
+            ZoneInfo("Europe/Lisbon")
+        ).replace(tzinfo=None)
+
+        if appt_date.weekday() in (5, 6):
+            errors.append(
+                "O salão está fechado ao sábado e ao domingo."
+                if lang == "pt"
+                else "The salon is closed on Saturdays and Sundays."
+            )
+
+        if slot_start < opening_time or slot_end > closing_time:
+            errors.append(
+                "Escolha um horário entre as 09:00 e as 19:00."
+                if lang == "pt"
+                else "Please choose a time between 09:00 and 19:00."
+            )
+
+        if appt_time.minute % 15 != 0 or appt_time.second:
+            errors.append(
+                "Escolha um horário em intervalos de 15 minutos."
+                if lang == "pt"
+                else "Please choose a time aligned to a 15-minute interval."
+            )
+
+        if slot_start < now_lisbon + timedelta(hours=2):
+            errors.append(
+                "A marcação deve ser feita com pelo menos 2 horas de antecedência."
+                if lang == "pt"
+                else "Bookings require at least 2 hours' notice."
+            )
+
+        # Serialize submissions for this salon on databases that support
+        # SELECT FOR UPDATE, then recheck conflicts before committing.
+        Salon.query.filter_by(
+            id=salon.id
+        ).with_for_update().one()
+
+        existing_bookings = (
+            Booking.query
+            .filter(
+                Booking.salon_id == salon.id,
+                Booking.appointment_date == appt_date,
+                Booking.status.notin_(["cancelled", "rejected"]),
+            )
+            .all()
+        )
+
+        for existing_booking in existing_bookings:
+            existing_start = datetime.combine(
+                appt_date,
+                existing_booking.appointment_time,
+            )
+            existing_end = existing_start + timedelta(
+                minutes=existing_booking.service.duration_minutes
+            )
+
+            if slot_start < existing_end and slot_end > existing_start:
+                errors.append(
+                    "Este horário já não está disponível. Escolha outro horário."
+                    if lang == "pt"
+                    else "This time is no longer available. Please choose another time."
+                )
+                break
+
+        try:
+            response = requests.post(
+                AVAILABILITY_WEBHOOK_URL,
+                json={
+                    "date": appt_date_str,
+                    "salon": salon.slug,
+                    "salon_name": salon.name,
+                },
+                timeout=10,
+            )
+            response.raise_for_status()
+            outlook_events = response.json()
+
+            if (
+                not isinstance(outlook_events, dict)
+                or not isinstance(outlook_events.get("value"), list)
+            ):
+                raise ValueError(
+                    "Invalid Outlook availability response"
+                )
+
+            lisbon_tz = ZoneInfo("Europe/Lisbon")
+
+            for event in outlook_events["value"]:
+                start_data = event["start"]
+                end_data = event["end"]
+
+                outlook_start = datetime.fromisoformat(
+                    start_data["dateTime"].replace(
+                        "Z",
+                        "+00:00",
+                    )
+                )
+                outlook_end = datetime.fromisoformat(
+                    end_data["dateTime"].replace(
+                        "Z",
+                        "+00:00",
+                    )
+                )
+
+                if outlook_start.tzinfo is None:
+                    start_timezone_name = start_data.get(
+                        "timeZone"
+                    )
+                    if not start_timezone_name:
+                        raise ValueError(
+                            "Outlook start datetime has no timezone"
+                        )
+                    if start_timezone_name == "GMT Standard Time":
+                        start_timezone_name = "Europe/Lisbon"
+                    outlook_start = outlook_start.replace(
+                        tzinfo=ZoneInfo(start_timezone_name)
+                    )
+
+                if outlook_end.tzinfo is None:
+                    end_timezone_name = end_data.get(
+                        "timeZone"
+                    )
+                    if not end_timezone_name:
+                        raise ValueError(
+                            "Outlook end datetime has no timezone"
+                        )
+                    if end_timezone_name == "GMT Standard Time":
+                        end_timezone_name = "Europe/Lisbon"
+                    outlook_end = outlook_end.replace(
+                        tzinfo=ZoneInfo(end_timezone_name)
+                    )
+
+                existing_start = (
+                    outlook_start
+                    .astimezone(lisbon_tz)
+                    .replace(tzinfo=None)
+                )
+                existing_end = (
+                    outlook_end
+                    .astimezone(lisbon_tz)
+                    .replace(tzinfo=None)
+                )
+
+                if (
+                    slot_start < existing_end
+                    and slot_end > existing_start
+                ):
+                    errors.append(
+                        "Este horário já não está disponível. Escolha outro horário."
+                        if lang == "pt"
+                        else "This time is no longer available. Please choose another time."
+                    )
+                    break
+
+        except Exception as error:
+            print(
+                "Erro ao confirmar disponibilidade no Outlook:",
+                error,
+            )
+            errors.append(
+                "Não foi possível confirmar a disponibilidade. Tente novamente dentro de instantes."
+                if lang == "pt"
+                else "We could not confirm availability. Please try again shortly."
+            )
+
+        if errors:
+            db.session.rollback()
+
+            for err in errors:
+                flash(err, "danger")
+
+            return render_template(
+                "book.html",
+                salon=salon,
+                salons=Salon.query.order_by(Salon.name).all(),
+                categories=categories,
+                selected_service=service,
+                lang=lang,
                 form_data=request.form,
                 today=date.today().isoformat(),
             )
