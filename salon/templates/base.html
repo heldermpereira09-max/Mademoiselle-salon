@@ -181,6 +181,72 @@
 
       </div>
 
+      <div class="footer-feedback">
+        <p class="footer-feedback-question">
+          {% if lang == 'pt' %}Gostou da experiência no nosso site?{% else %}Did you enjoy using our website?{% endif %}
+        </p>
+        <button
+          type="button"
+          class="footer-feedback-toggle"
+          id="feedbackToggle"
+          aria-expanded="false"
+          aria-controls="feedbackForm">
+          {% if lang == 'pt' %}Avaliar o site{% else %}Rate the website{% endif %}
+        </button>
+
+        <p class="footer-feedback-status" id="feedbackStatus" role="status" aria-live="polite"></p>
+
+        <form
+          class="footer-feedback-form"
+          id="feedbackForm"
+          action="{{ url_for('main.website_feedback') }}"
+          method="post"
+          data-network-error="{% if lang == 'pt' %}Não foi possível enviar a sua avaliação. Tente novamente.{% else %}We could not send your feedback. Please try again.{% endif %}"
+          hidden>
+          <input type="hidden" name="salon" value="{{ salon.slug if salon else '' }}" />
+          <input type="hidden" name="language" value="{{ lang }}" />
+          <input type="hidden" name="submitted_at" id="feedbackSubmittedAt" value="" />
+
+          <fieldset class="footer-rating">
+            <legend>{% if lang == 'pt' %}Avaliação de 1 a 5{% else %}Rating from 1 to 5{% endif %}</legend>
+            <div class="footer-rating-options">
+              {% for rating in range(1, 6) %}
+                <input
+                  type="radio"
+                  name="rating"
+                  id="feedbackRating{{ rating }}"
+                  value="{{ rating }}"
+                  required />
+                <label for="feedbackRating{{ rating }}" data-rating="{{ rating }}">
+                  <span aria-hidden="true">★</span>
+                  <span class="footer-rating-label">
+                    {{ rating }} {% if lang == 'pt' %}de 5{% else %}out of 5{% endif %}
+                  </span>
+                </label>
+              {% endfor %}
+            </div>
+          </fieldset>
+
+          <label for="feedbackComment">
+            {% if lang == 'pt' %}Comentário (opcional){% else %}Comment (optional){% endif %}
+          </label>
+          <textarea
+            id="feedbackComment"
+            name="comment"
+            rows="3"
+            placeholder="{% if lang == 'pt' %}Conte-nos como podemos melhorar{% else %}Tell us how we can improve{% endif %}"></textarea>
+
+          <button type="submit" class="footer-feedback-submit">
+            {% if lang == 'pt' %}Enviar avaliação{% else %}Submit feedback{% endif %}
+          </button>
+        </form>
+      </div>
+
+      <p class="footer-credit">
+        {% if lang == 'pt' %}Website desenvolvido por{% else %}Website developed by{% endif %}
+        <a href="https://instagram.com/novofluxo05" target="_blank" rel="noopener">NovoFluxo</a>
+      </p>
+
       <div class="footer-bottom">
         <p>&copy; 2026 Mademoiselle Estética & Beleza by Daniela Alves</p>
         <p>{% if lang == 'pt' %}Todos os direitos reservados.{% else %}All rights reserved.{% endif %}</p>

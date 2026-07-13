@@ -1,5 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
+from email.message import EmailMessage
+import os
 import requests
+import smtplib
 from .app import db
 from .models.models import Salon, ServiceCategory, Service, Booking
 from datetime import datetime, date, timedelta, timezone
@@ -21,6 +24,118 @@ def get_selected_salon():
         return None
 
     return Salon.query.filter_by(slug=slug).first()
+
+
+def send_feedback_email(
+    rating,
+    comment,
+    salon_name,
+    language,
+    submitted_at,
+    remote_addr,
+    user_agent,
+):
+    mail_server = os.environ.get("MAIL_SERVER")
+    mail_port = int(os.environ.get("MAIL_PORT", "587"))
+    mail_username = os.environ.get("MAIL_USERNAME")
+    mail_password = os.environ.get("MAIL_PASSWORD")
+    mail_use_tls = os.environ.get("MAIL_USE_TLS", "true").lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+    recipient = os.environ.get("FEEDBACK_RECIPIENT")
+
+    if not all([
+        mail_server,
+        mail_username,
+        mail_password,
+        recipient,
+    ]):
+        raise RuntimeError("Website feedback email settings are incomplete.")
+
+    message = EmailMessage()
+    message["Subject"] = "⭐ Nova avaliação do website Mademoiselle"
+    message["From"] = mail_username
+    message["To"] = recipient
+    message.set_content(
+        "\n".join([
+            "New Mademoiselle website feedback",
+            "",
+            f"Rating: {rating}/5",
+            f"Comment: {comment or 'No comment provided'}",
+            f"Salon: {salon_name or 'Not selected'}",
+            f"Language: {language}",
+            f"Submitted at: {submitted_at.isoformat()}",
+            f"IP address: {remote_addr or 'Unavailable'}",
+            f"User agent: {user_agent or 'Unavailable'}",
+        ])
+    )
+
+    with smtplib.SMTP(mail_server, mail_port, timeout=10) as smtp:
+        smtp.ehlo()
+
+        if mail_use_tls:
+            smtp.starttls()
+            smtp.ehlo()
+
+        smtp.login(mail_username, mail_password)
+        smtp.send_message(message)
+
+
+@main.route("/website-feedback", methods=["POST"])
+def website_feedback():
+    language = request.form.get("language", "").strip()
+
+    if language not in ["pt", "en"]:
+        language = get_lang()
+
+    rating = request.form.get("rating", type=int)
+    comment = request.form.get("comment", "").strip()
+    salon = get_selected_salon()
+    submitted_at = datetime.now(ZoneInfo("Europe/Lisbon"))
+
+    if rating not in range(1, 6):
+        return jsonify({
+            "success": False,
+            "message": (
+                "Selecione uma avaliação de 1 a 5."
+                if language == "pt"
+                else "Please select a rating from 1 to 5."
+            ),
+        }), 400
+
+    try:
+        send_feedback_email(
+            rating=rating,
+            comment=comment,
+            salon_name=salon.name if salon else None,
+            language=language,
+            submitted_at=submitted_at,
+            remote_addr=request.remote_addr,
+            user_agent=request.user_agent.string,
+        )
+    except Exception as error:
+        print("Erro ao enviar feedback do website:", error)
+
+        return jsonify({
+            "success": False,
+            "message": (
+                "Não foi possível enviar a sua avaliação. Tente novamente."
+                if language == "pt"
+                else "We could not send your feedback. Please try again."
+            ),
+        }), 502
+
+    return jsonify({
+        "success": True,
+        "message": (
+            "Obrigada pela sua opinião!"
+            if language == "pt"
+            else "Thank you for your feedback!"
+        ),
+    })
 
 
 @main.route("/set-lang/<lang>")
