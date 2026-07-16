@@ -895,4 +895,13 @@ def api_available_times():
 
 @main.route("/contact")
 def contact():
-    return render_template("contact.html", lang=get_lang())
+    salon = get_selected_salon()
+
+    if not salon:
+        return redirect(url_for("main.welcome"))
+
+    return render_template(
+        "contact.html",
+        salon=salon,
+        lang=get_lang(),
+    )
