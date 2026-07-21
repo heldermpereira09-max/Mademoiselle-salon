@@ -4,6 +4,7 @@ import struct
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_babel import Babel, gettext as _
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from datetime import datetime, date, time, timedelta
 from dotenv import load_dotenv
 
@@ -105,8 +106,9 @@ def _compile_translations(app: Flask) -> None:
 load_dotenv()
 
 db = SQLAlchemy()
+migrate = Migrate()
 
-def create_app():
+def create_app(test_config=None):
     app = Flask(__name__)
 
     app.secret_key = os.environ.get(
@@ -132,7 +134,11 @@ def create_app():
     app.config["BABEL_SUPPORTED_LOCALES"] = ["pt", "en"]
     app.config["BABEL_TRANSLATION_DIRECTORIES"] = "translations"
 
+    if test_config:
+        app.config.update(test_config)
+
     db.init_app(app)
+    migrate.init_app(app, db)
 
     _compile_translations(app)
 
@@ -157,9 +163,8 @@ def create_app():
     from .routes import main
     app.register_blueprint(main)
 
-    with app.app_context():
-        db.create_all()
-
+    @app.cli.command("seed-data")
+    def seed_data_command():
         from .models import seed_data
         seed_data()
 

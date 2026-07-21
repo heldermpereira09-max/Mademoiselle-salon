@@ -1,1 +1,1 @@
-from .models import ServiceCategory, Service, Booking, seed_data
+from .models import Booking, Customer, Salon, Service, ServiceCategory, seed_data

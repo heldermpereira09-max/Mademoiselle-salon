@@ -5,6 +5,10 @@ dist
 tmp
 out-tsc
 *.tsbuildinfo
+__pycache__/
+*.py[cod]
+*.mo
+.pytest_cache/
 .expo
 .expo-shared
 
@@ -47,3 +51,17 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# Environment
+.env
+
+# Local databases
+instance/*.db
+
+# Temporary migration files
+routes_graph.diff
+salon/routes_vps.py
+salon/graph_vps.py
+
+# Python cache
+*.pyc

@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 from ..app import db
 
 
@@ -25,6 +26,61 @@ class Salon(db.Model):
         "Booking",
         back_populates="salon",
         cascade="all, delete-orphan"
+    )
+
+
+class Customer(db.Model):
+    __tablename__ = "customers"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(150))
+    phone = db.Column(db.String(30), nullable=False)
+    phone_normalized = db.Column(
+        db.String(30), nullable=False, unique=True, index=True
+    )
+    preferred_language = db.Column(db.String(5))
+    marketing_consent = db.Column(db.Boolean, nullable=False, default=False)
+    birth_date = db.Column(db.Date)
+    preferred_contact = db.Column(db.String(20))
+    total_bookings = db.Column(db.Integer, nullable=False, default=0)
+    total_spent = db.Column(
+        db.Numeric(10, 2), nullable=False, default=Decimal("0.00")
+    )
+    first_visit = db.Column(db.Date)
+    last_visit = db.Column(db.Date)
+    loyalty_points = db.Column(db.Integer, nullable=False, default=0)
+    loyalty_level = db.Column(
+        db.String(30), nullable=False, default="STANDARD"
+    )
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(
+        db.DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+    )
+
+    bookings = db.relationship("Booking", back_populates="customer", lazy=True)
+
+    __table_args__ = (
+        db.CheckConstraint(
+            "preferred_contact IS NULL OR "
+            "preferred_contact IN ('WHATSAPP', 'EMAIL', 'PHONE')",
+            name="ck_customers_preferred_contact",
+        ),
+        db.CheckConstraint(
+            "total_bookings >= 0",
+            name="ck_customers_total_bookings_nonnegative",
+        ),
+        db.CheckConstraint(
+            "total_spent >= 0",
+            name="ck_customers_total_spent_nonnegative",
+        ),
+        db.CheckConstraint(
+            "loyalty_points >= 0",
+            name="ck_customers_loyalty_points_nonnegative",
+        ),
     )
 
 
@@ -86,6 +142,13 @@ class Booking(db.Model):
     __tablename__ = "bookings"
 
     id = db.Column(db.Integer, primary_key=True)
+    customer_id = db.Column(
+        db.Integer,
+        db.ForeignKey("customers.id"),
+        nullable=True,
+        index=True,
+    )
+    customer = db.relationship("Customer", back_populates="bookings")
     client_name = db.Column(db.String(100), nullable=False)
     client_email = db.Column(db.String(150), nullable=True)
     client_phone = db.Column(db.String(30), nullable=False)
@@ -103,6 +166,7 @@ class Booking(db.Model):
 
     service_id = db.Column(db.Integer, db.ForeignKey("services.id"), nullable=False)
     service = db.relationship("Service")
+    service_price = db.Column(db.Numeric(10, 2), nullable=True)
 
     appointment_date = db.Column(db.Date, nullable=False)
     appointment_time = db.Column(db.Time, nullable=False)
