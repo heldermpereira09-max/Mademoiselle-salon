@@ -66,3 +66,28 @@ def record_customer_booking(customer, booking):
         customer.first_visit = appointment_date
     if customer.last_visit is None or appointment_date > customer.last_visit:
         customer.last_visit = appointment_date
+
+
+def refresh_customer_booking_metrics(customer):
+    """Recalcula agregados após editar uma marcação existente."""
+    if customer is None:
+        return
+
+    bookings = list(customer.bookings)
+    customer.total_bookings = len(bookings)
+    customer.total_spent = sum(
+        (
+            Decimal(booking.service_price)
+            for booking in bookings
+            if booking.service_price is not None
+        ),
+        Decimal("0.00"),
+    )
+    customer.first_visit = min(
+        (booking.appointment_date for booking in bookings),
+        default=None,
+    )
+    customer.last_visit = max(
+        (booking.appointment_date for booking in bookings),
+        default=None,
+    )

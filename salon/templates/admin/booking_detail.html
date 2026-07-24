@@ -1,0 +1,43 @@
+{% extends "admin/base.html" %}
+{% block title %}Marcação {{ booking.id }}{% endblock %}
+{% block header %}
+  <header class="admin-header">
+    <p class="admin-brand">Mademoiselle — Administração</p>
+    <nav class="admin-nav" aria-label="Navegação administrativa">
+      <a href="{{ url_for('admin.dashboard') }}">Painel</a>
+      <a href="{{ url_for('admin.bookings') }}">Marcações</a>
+    </nav>
+    <form class="admin-logout" method="post" action="{{ url_for('admin.logout') }}">
+      <button type="submit">Terminar sessão</button>
+    </form>
+  </header>
+{% endblock %}
+{% block content %}
+  <p>
+    <a class="admin-link" href="{{ return_to or url_for('admin.bookings') }}">← Voltar</a>
+    <a
+      class="admin-link primary"
+      href="{{ url_for('admin.booking_edit', booking_id=booking.id, return_to=url_for('admin.booking_detail', booking_id=booking.id, return_to=return_to) if return_to else url_for('admin.booking_detail', booking_id=booking.id)) }}">
+      Editar
+    </a>
+  </p>
+  <h1>Marcação #{{ booking.id }}</h1>
+  <dl class="admin-detail">
+    <dt>Data e hora</dt>
+    <dd>{{ booking.appointment_date.strftime("%d/%m/%Y") }} às {{ booking.appointment_time.strftime("%H:%M") }}</dd>
+    <dt>Cliente</dt>
+    <dd>{{ booking.client_name }}</dd>
+    <dt>Email</dt>
+    <dd>{{ booking.client_email or "—" }}</dd>
+    <dt>Telefone</dt>
+    <dd>{{ booking.client_phone }}</dd>
+    <dt>Serviço</dt>
+    <dd>{{ booking.service.name_pt }}</dd>
+    <dt>Salão</dt>
+    <dd>{{ booking.salon.name }}</dd>
+    <dt>Estado</dt>
+    <dd>{{ booking.status }}</dd>
+    <dt>Observações</dt>
+    <dd>{{ booking.notes or "—" }}</dd>
+  </dl>
+{% endblock %}

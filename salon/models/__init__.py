@@ -1,1 +1,9 @@
-from .models import Booking, Customer, Salon, Service, ServiceCategory, seed_data
+from .models import (
+    AdminUser,
+    Booking,
+    Customer,
+    Salon,
+    Service,
+    ServiceCategory,
+    seed_data,
+)

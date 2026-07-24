@@ -1,0 +1,49 @@
+{% extends "admin/base.html" %}
+{% block title %}Entrar{% endblock %}
+{% block content %}
+  <section class="admin-card">
+    <h1>Administração</h1>
+    <form method="post" action="{{ url_for('admin.login') }}">
+      {% if next_url %}
+        <input type="hidden" name="next" value="{{ next_url }}">
+      {% endif %}
+      <div class="admin-field">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" autocomplete="username" required autofocus>
+      </div>
+      <div class="admin-field">
+        <label for="password">Palavra-passe</label>
+        <div class="admin-password-field">
+          <input id="password" name="password" type="password" autocomplete="current-password" required>
+          <button
+            id="passwordToggle"
+            class="admin-password-toggle"
+            type="button"
+            aria-label="Mostrar palavra-passe"
+            aria-pressed="false">
+            <span aria-hidden="true">&#128065;</span>
+          </button>
+        </div>
+      </div>
+      <button type="submit">Entrar</button>
+    </form>
+  </section>
+{% endblock %}
+{% block scripts %}
+<script>
+  const passwordInput = document.getElementById("password");
+  const passwordToggle = document.getElementById("passwordToggle");
+  const passwordIcon = passwordToggle.querySelector("span");
+
+  passwordToggle.addEventListener("click", () => {
+    const isVisible = passwordInput.type === "text";
+    passwordInput.type = isVisible ? "password" : "text";
+    passwordToggle.setAttribute("aria-pressed", String(!isVisible));
+    passwordToggle.setAttribute(
+      "aria-label",
+      isVisible ? "Mostrar palavra-passe" : "Esconder palavra-passe"
+    );
+    passwordIcon.innerHTML = isVisible ? "&#128065;" : "&#128584;";
+  });
+</script>
+{% endblock %}

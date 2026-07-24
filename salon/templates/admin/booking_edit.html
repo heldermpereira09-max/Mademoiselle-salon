@@ -1,0 +1,109 @@
+{% extends "admin/base.html" %}
+{% block title %}Editar marcação {{ booking.id }}{% endblock %}
+{% block header %}
+  <header class="admin-header">
+    <p class="admin-brand">Mademoiselle — Administração</p>
+    <nav class="admin-nav" aria-label="Navegação administrativa">
+      <a href="{{ url_for('admin.dashboard') }}">Painel</a>
+      <a href="{{ url_for('admin.bookings') }}">Marcações</a>
+    </nav>
+    <form class="admin-logout" method="post" action="{{ url_for('admin.logout') }}">
+      <button type="submit">Terminar sessão</button>
+    </form>
+  </header>
+{% endblock %}
+{% block content %}
+  <h1>Editar marcação #{{ booking.id }}</h1>
+
+  {% if errors %}
+    <ul class="admin-errors" role="alert">
+      {% for error in errors %}
+        <li>{{ error }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  <form
+    class="admin-form"
+    method="post"
+    action="{{ url_for('admin.booking_edit', booking_id=booking.id) }}">
+    {% if return_to %}
+      <input type="hidden" name="return_to" value="{{ return_to }}">
+    {% endif %}
+
+    <div class="admin-form-grid">
+      <div class="admin-field">
+        <label>Cliente</label>
+        <div class="admin-readonly">{{ booking.client_name }}</div>
+      </div>
+      <div class="admin-field">
+        <label>Salão</label>
+        <div class="admin-readonly">{{ booking.salon.name }}</div>
+      </div>
+      <div class="admin-field">
+        <label>Telefone</label>
+        <div class="admin-readonly">{{ booking.client_phone }}</div>
+      </div>
+      <div class="admin-field">
+        <label>Email</label>
+        <div class="admin-readonly">{{ booking.client_email or "—" }}</div>
+      </div>
+
+      <div class="admin-field admin-field-full">
+        <label for="service_id">Serviço</label>
+        <select id="service_id" name="service_id" required>
+          {% for service in services %}
+            <option
+              value="{{ service.id }}"
+              {% if form_data.get('service_id')|int == service.id %}selected{% endif %}>
+              {{ service.name_pt }} — {{ service.duration_minutes }} min —
+              {{ "%.2f"|format(service.price) }} €
+            </option>
+          {% endfor %}
+        </select>
+        <small>
+          Serviço atual: {{ booking.service.name_pt }}
+        </small>
+      </div>
+
+      <div class="admin-field">
+        <label for="appointment_date">Data</label>
+        <input
+          id="appointment_date"
+          name="appointment_date"
+          type="date"
+          value="{{ form_data.get('appointment_date', '') }}"
+          required>
+      </div>
+      <div class="admin-field">
+        <label for="appointment_time">Hora</label>
+        <input
+          id="appointment_time"
+          name="appointment_time"
+          type="time"
+          step="900"
+          value="{{ form_data.get('appointment_time', '') }}"
+          required>
+      </div>
+
+      <div class="admin-field admin-field-full">
+        <label for="notes">Observações</label>
+        <textarea id="notes" name="notes" rows="4">{{ form_data.get('notes', '') }}</textarea>
+      </div>
+    </div>
+
+    <p class="admin-sync-note">
+      Ao guardar, esta alteração será sincronizada com o evento existente no
+      Outlook Calendar.
+    </p>
+
+    <div class="admin-form-actions">
+      <button type="submit">Guardar alterações</button>
+      <a
+        class="admin-link"
+        href="{{ return_to or url_for('admin.booking_detail', booking_id=booking.id) }}">
+        Cancelar
+      </a>
+    </div>
+  </form>
+{% endblock %}

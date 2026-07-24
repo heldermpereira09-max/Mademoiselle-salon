@@ -121,7 +121,7 @@ def _parse_graph_datetime(value):
     return parsed.astimezone(LISBON_TZ).replace(tzinfo=None)
 
 
-def get_calendar_events(appointment_date):
+def get_calendar_events(appointment_date, exclude_event_id=None):
     """Devolve os períodos ocupados do calendário num determinado dia."""
 
     if not isinstance(appointment_date, date):
@@ -163,6 +163,9 @@ def get_calendar_events(appointment_date):
     busy_periods = []
 
     for event in data.get("value", []):
+        if exclude_event_id and event.get("id") == exclude_event_id:
+            continue
+
         if event.get("isCancelled"):
             continue
 
@@ -177,7 +180,7 @@ def get_calendar_events(appointment_date):
     return busy_periods
 
 
-def create_calendar_event(
+def _calendar_event_payload(
     *,
     salon_name,
     salon_address,
@@ -189,12 +192,6 @@ def create_calendar_event(
     start_datetime,
     end_datetime,
 ):
-    """Cria uma marcação no calendário e devolve o ID do evento."""
-
-    settings = _settings()
-    mailbox = quote(settings["MS_MAILBOX"], safe="")
-    calendar_id = quote(settings["MS_CALENDAR_ID"], safe="")
-
     start_lisbon = start_datetime.replace(tzinfo=LISBON_TZ)
     end_lisbon = end_datetime.replace(tzinfo=LISBON_TZ)
 
@@ -210,7 +207,7 @@ def create_calendar_event(
         f"Observações: {notes or 'Sem observações'}",
     ]
 
-    payload = {
+    return {
         "subject": f"[{salon_name}] {service_name} — {client_name}",
         "body": {
             "contentType": "text",
@@ -232,6 +229,36 @@ def create_calendar_event(
         "reminderMinutesBeforeStart": 60,
     }
 
+
+def create_calendar_event(
+    *,
+    salon_name,
+    salon_address,
+    service_name,
+    client_name,
+    client_phone,
+    client_email,
+    notes,
+    start_datetime,
+    end_datetime,
+):
+    """Cria uma marcação no calendário e devolve o ID do evento."""
+
+    settings = _settings()
+    mailbox = quote(settings["MS_MAILBOX"], safe="")
+    calendar_id = quote(settings["MS_CALENDAR_ID"], safe="")
+    payload = _calendar_event_payload(
+        salon_name=salon_name,
+        salon_address=salon_address,
+        service_name=service_name,
+        client_name=client_name,
+        client_phone=client_phone,
+        client_email=client_email,
+        notes=notes,
+        start_datetime=start_datetime,
+        end_datetime=end_datetime,
+    )
+
     url = (
         f"{GRAPH_BASE_URL}/users/{mailbox}"
         f"/calendars/{calendar_id}/events"
@@ -252,6 +279,79 @@ def create_calendar_event(
     return event_id
 
 
+def update_calendar_event(
+    *,
+    event_id,
+    salon_name,
+    salon_address,
+    service_name,
+    client_name,
+    client_phone,
+    client_email,
+    notes,
+    start_datetime,
+    end_datetime,
+):
+    """Atualiza uma marcação existente no calendário."""
+
+    if not event_id:
+        raise GraphError("A marcação não tem um evento Outlook associado.")
+
+    settings = _settings()
+    mailbox = quote(settings["MS_MAILBOX"], safe="")
+    calendar_id = quote(settings["MS_CALENDAR_ID"], safe="")
+    encoded_event_id = quote(event_id, safe="")
+    payload = _calendar_event_payload(
+        salon_name=salon_name,
+        salon_address=salon_address,
+        service_name=service_name,
+        client_name=client_name,
+        client_phone=client_phone,
+        client_email=client_email,
+        notes=notes,
+        start_datetime=start_datetime,
+        end_datetime=end_datetime,
+    )
+
+    url = (
+        f"{GRAPH_BASE_URL}/users/{mailbox}"
+        f"/calendars/{calendar_id}/events/{encoded_event_id}"
+    )
+    _request(
+        "PATCH",
+        url,
+        json=payload,
+        headers={"Content-Type": "application/json"},
+    )
+
+    return True
+
+
+def _send_html_email(recipient, subject, body):
+    settings = _settings()
+    mailbox = quote(settings["MS_MAILBOX"], safe="")
+    payload = {
+        "message": {
+            "subject": subject,
+            "body": {
+                "contentType": "HTML",
+                "content": body,
+            },
+            "toRecipients": [
+                {"emailAddress": {"address": recipient}}
+            ],
+        },
+        "saveToSentItems": True,
+    }
+    _request(
+        "POST",
+        f"{GRAPH_BASE_URL}/users/{mailbox}/sendMail",
+        json=payload,
+        headers={"Content-Type": "application/json"},
+    )
+    return True
+
+
 def send_confirmation_email(
     *,
     recipient,
@@ -270,9 +370,6 @@ def send_confirmation_email(
 
     if not recipient:
         return False
-
-    settings = _settings()
-    mailbox = quote(settings["MS_MAILBOX"], safe="")
 
     if language == "en":
         subject = "Booking confirmation — Mademoiselle"
@@ -309,29 +406,61 @@ def send_confirmation_email(
         <p>Obrigada,<br>Mademoiselle Estética &amp; Beleza</p>
         """
 
-    payload = {
-        "message": {
-            "subject": subject,
-            "body": {
-                "contentType": "HTML",
-                "content": body,
-            },
-            "toRecipients": [
-                {
-                    "emailAddress": {
-                        "address": recipient,
-                    }
-                }
-            ],
-        },
-        "saveToSentItems": True,
-    }
+    return _send_html_email(recipient, subject, body)
 
-    _request(
-        "POST",
-        f"{GRAPH_BASE_URL}/users/{mailbox}/sendMail",
-        json=payload,
-        headers={"Content-Type": "application/json"},
-    )
 
-    return True
+def send_booking_updated_email(
+    *,
+    recipient,
+    language,
+    client_name,
+    salon_name,
+    salon_address,
+    salon_phone,
+    service_name,
+    appointment_date,
+    appointment_time,
+    duration_minutes,
+    price,
+):
+    """Informa o cliente de que a marcação foi alterada."""
+
+    if not recipient:
+        return False
+
+    if language == "en":
+        subject = "Booking updated — Mademoiselle"
+        body = f"""
+        <p>Hello {client_name},</p>
+        <p>Your booking has been updated.</p>
+        <p>
+        <strong>Salon:</strong> {salon_name}<br>
+        <strong>Service:</strong> {service_name}<br>
+        <strong>New date:</strong> {appointment_date.strftime('%d/%m/%Y')}<br>
+        <strong>New time:</strong> {appointment_time.strftime('%H:%M')}<br>
+        <strong>Duration:</strong> {duration_minutes} minutes<br>
+        <strong>Price:</strong> €{price:.2f}<br>
+        <strong>Address:</strong> {salon_address}<br>
+        <strong>Telephone:</strong> {salon_phone}
+        </p>
+        <p>Thank you,<br>Mademoiselle Estética &amp; Beleza</p>
+        """
+    else:
+        subject = "Alteração da sua marcação — Mademoiselle"
+        body = f"""
+        <p>Olá {client_name},</p>
+        <p>A sua marcação foi alterada com sucesso.</p>
+        <p>
+        <strong>Salão:</strong> {salon_name}<br>
+        <strong>Serviço:</strong> {service_name}<br>
+        <strong>Nova data:</strong> {appointment_date.strftime('%d/%m/%Y')}<br>
+        <strong>Nova hora:</strong> {appointment_time.strftime('%H:%M')}<br>
+        <strong>Duração:</strong> {duration_minutes} minutos<br>
+        <strong>Preço:</strong> {price:.2f} €<br>
+        <strong>Morada:</strong> {salon_address}<br>
+        <strong>Telefone:</strong> {salon_phone}
+        </p>
+        <p>Obrigada,<br>Mademoiselle Estética &amp; Beleza</p>
+        """
+
+    return _send_html_email(recipient, subject, body)

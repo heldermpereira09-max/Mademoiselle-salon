@@ -133,6 +133,7 @@ def create_app(test_config=None):
     app.config["BABEL_DEFAULT_LOCALE"] = "pt"
     app.config["BABEL_SUPPORTED_LOCALES"] = ["pt", "en"]
     app.config["BABEL_TRANSLATION_DIRECTORIES"] = "translations"
+    app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=8)
 
     if test_config:
         app.config.update(test_config)
@@ -162,6 +163,12 @@ def create_app(test_config=None):
 
     from .routes import main
     app.register_blueprint(main)
+
+    from .admin import admin
+    app.register_blueprint(admin)
+
+    from .admin.cli import create_admin_command
+    app.cli.add_command(create_admin_command)
 
     @app.cli.command("seed-data")
     def seed_data_command():

@@ -1,0 +1,110 @@
+{% extends "admin/base.html" %}
+{% block title %}Marcações{% endblock %}
+{% block header %}
+  <header class="admin-header">
+    <p class="admin-brand">Mademoiselle — Administração</p>
+    <nav class="admin-nav" aria-label="Navegação administrativa">
+      <a href="{{ url_for('admin.dashboard') }}">Painel</a>
+      <a href="{{ url_for('admin.bookings') }}">Marcações</a>
+    </nav>
+    <form class="admin-logout" method="post" action="{{ url_for('admin.logout') }}">
+      <button type="submit">Terminar sessão</button>
+    </form>
+  </header>
+{% endblock %}
+{% block content %}
+  <h1>Gestão de Marcações</h1>
+
+  <form class="admin-toolbar" method="get" action="{{ url_for('admin.bookings') }}">
+    <div class="admin-search">
+      <label for="bookingSearch">Pesquisar</label>
+      <input
+        id="bookingSearch"
+        name="q"
+        type="search"
+        value="{{ search }}"
+        placeholder="Nome, telefone ou email">
+    </div>
+    <input type="hidden" name="period" value="{{ period }}">
+    <button type="submit">Pesquisar</button>
+    {% if search %}
+      <a class="admin-link" href="{{ url_for('admin.bookings', period=period) }}">Limpar</a>
+    {% endif %}
+  </form>
+
+  <nav class="admin-filters" aria-label="Filtrar marcações por data">
+    {% for value, label in (
+      ("today", "Hoje"),
+      ("tomorrow", "Amanhã"),
+      ("week", "Esta semana"),
+      ("all", "Todas")
+    ) %}
+      <a
+        class="admin-filter{% if period == value %} active{% endif %}"
+        href="{{ url_for('admin.bookings', period=value, q=search) }}">
+        {{ label }}
+      </a>
+    {% endfor %}
+  </nav>
+
+  <div class="admin-table-wrap">
+    {% if bookings %}
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Hora</th>
+            <th>Cliente</th>
+            <th>Telefone</th>
+            <th>Serviço</th>
+            <th>Salão</th>
+            <th>Estado</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for booking in bookings %}
+            <tr data-booking-id="{{ booking.id }}">
+              <td>{{ booking.appointment_date.strftime("%d/%m/%Y") }}</td>
+              <td>{{ booking.appointment_time.strftime("%H:%M") }}</td>
+              <td>{{ booking.client_name }}</td>
+              <td>{{ booking.client_phone }}</td>
+              <td>{{ booking.service.name_pt }}</td>
+              <td>{{ booking.salon.name }}</td>
+              <td>{{ booking.status }}</td>
+              <td class="admin-actions">
+                <a class="admin-action" href="{{ url_for('admin.booking_detail', booking_id=booking.id) }}">Ver</a>
+                <a
+                  class="admin-action"
+                  data-action="edit"
+                  data-booking-id="{{ booking.id }}"
+                  href="{{ url_for('admin.booking_edit', booking_id=booking.id, return_to=request.full_path.rstrip('?')) }}">
+                  Editar
+                </a>
+                <button class="admin-action" type="button" data-action="cancel" data-booking-id="{{ booking.id }}" disabled>Cancelar</button>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="admin-empty">Nenhuma marcação encontrada.</p>
+    {% endif %}
+  </div>
+
+  {% if pagination.pages > 1 %}
+    <nav class="admin-pagination" aria-label="Paginação">
+      {% for page_number in pagination.iter_pages() %}
+        {% if page_number %}
+          <a
+            class="admin-filter{% if page_number == pagination.page %} active{% endif %}"
+            href="{{ url_for('admin.bookings', page=page_number, period=period, q=search) }}">
+            {{ page_number }}
+          </a>
+        {% else %}
+          <span>…</span>
+        {% endif %}
+      {% endfor %}
+    </nav>
+  {% endif %}
+{% endblock %}

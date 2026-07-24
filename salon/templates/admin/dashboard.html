@@ -1,0 +1,50 @@
+{% extends "admin/base.html" %}
+{% block title %}Painel{% endblock %}
+{% block header %}
+  <header class="admin-header">
+    <p class="admin-brand">Mademoiselle — Administração</p>
+    <nav class="admin-nav" aria-label="Navegação administrativa">
+      <a href="{{ url_for('admin.dashboard') }}">Painel</a>
+      <a href="{{ url_for('admin.bookings') }}">Marcações</a>
+    </nav>
+    <form class="admin-logout" method="post" action="{{ url_for('admin.logout') }}">
+      <button type="submit">Terminar sessão</button>
+    </form>
+  </header>
+{% endblock %}
+{% block content %}
+  <h1>Painel de Administração</h1>
+  <div class="admin-stat">
+    <span>Marcações de hoje</span>
+    <strong data-testid="bookings-today-count">{{ bookings_today_count }}</strong>
+  </div>
+
+  <p>
+    <a class="admin-link primary" href="{{ url_for('admin.bookings') }}">
+      Gerir marcações
+    </a>
+  </p>
+
+  <h2>Próximas marcações de hoje</h2>
+  {% if upcoming_bookings %}
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr><th>Hora</th><th>Cliente</th><th>Serviço</th><th>Salão</th></tr>
+        </thead>
+        <tbody>
+          {% for booking in upcoming_bookings %}
+            <tr>
+              <td>{{ booking.appointment_time.strftime("%H:%M") }}</td>
+              <td>{{ booking.client_name }}</td>
+              <td>{{ booking.service.name_pt }}</td>
+              <td>{{ booking.salon.name }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="admin-empty">Não existem mais marcações para hoje.</p>
+  {% endif %}
+{% endblock %}
